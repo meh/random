@@ -3,7 +3,7 @@
 
 require 'optimus'
 require 'rqrcode'
-require 'png'
+require 'chunky_png'
 
 opt = Optimus.new {|o|
   o.set(
@@ -56,13 +56,13 @@ if !opt.params[:output]
 else
   size = (3 * 2) + (code.module_count)
 
-  canvas = PNG::Canvas.new(size, size, PNG::Color::White)
+  img = ChunkyPNG::Image.new(size, size, ChunkyPNG::Color::WHITE)
 
   code.modules.reverse.each_with_index {|row, y|
     row.each_with_index {|col, x|
-      canvas[x + 3, y + 3] = PNG::Color::Black if col
+      img[x + 3, y + 3] = ChunkyPNG::Color::BLACK if col
     }
   }
 
-  PNG.new(canvas).save(opt.params[:output])
+  img.save(opt.params[:output])
 end
