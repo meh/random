@@ -10,6 +10,15 @@ opt = Optimus.new {|o|
     :long  => 'output',
     :short => 'o'
   )
+
+  o.set(
+    :type => :numeric,
+
+    :long  => 'retry',
+    :short => 'r',
+
+    :default => 5
+  )
 }
 
 MANGA = opt.arguments.shift || exit
@@ -40,10 +49,17 @@ volumes.each {|volume|
       puts "Downloading page #{page}/#{pages.last} (volume #{volume}/#{volumes.last})."
     end
 
+    retries = 0
+
     begin
       path = Net::HTTP.get(URI.parse("#{HOST}/series/#{MANGA.downcase}-volume-#{'%02d' % [volume]}.html?ch=Volume+#{'%02d' % [volume]}&page=#{page}")).match(/<img src="(.*?\.jpg)"/)[1] rescue nil
 
       if !path
+        if retries < opt.params[:r]
+          retries += 1
+          raise Errno::ETIMEDOUT
+        end
+
         puts "Couldn't download page #{page} (#{"#{HOST}/series/#{MANGA.downcase}-volume-#{'%02d' % [volume]}.html?ch=Volume+#{'%02d' % [volume]}&page=#{page}"}."
         next
       end
