@@ -52,7 +52,7 @@ volumes.each {|volume|
     retries = 0
 
     begin
-      path = Net::HTTP.get(URI.parse("#{HOST}/series/#{MANGA.downcase}-volume-#{'%02d' % [volume]}.html?ch=Volume+#{'%02d' % [volume]}&page=#{page}")).match(/<img src="(.*?\.jpg)"/)[1] rescue nil
+      path = Net::HTTP.get(URI.parse("#{HOST}/series/#{MANGA.downcase}-volume-#{'%02d' % [volume]}.html?ch=Volume+#{'%02d' % [volume]}&page=#{page}")).match(%r{<img src="(/manga/.*?)"})[1] rescue nil
 
       if !path
         if retries < opt.params[:r]
@@ -67,7 +67,7 @@ volumes.each {|volume|
       file = File.new(file, 'w')
       file.write(Net::HTTP.get(URI.parse("#{HOST}#{URI.encode(path)}")))
       file.close
-    rescue Errno::ETIMEDOUT
+    rescue Errno::ETIMEDOUT, EOFError
       retry
     end
   }
