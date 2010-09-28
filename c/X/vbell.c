@@ -124,6 +124,7 @@ main (int argc, char** argv) {
             Gamma_fade(display, screen, average + 5, average, 0.1, 0.005);
 
             XF86VidModeSetGamma(display, screen, &original);
+            XF86VidModeGetGamma(display, screen, &original);
         }
         #endif
     }
