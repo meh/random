@@ -187,7 +187,7 @@ BacklightRange*
 Backlight_range (Display* display, RROutput output, Atom backlight)
 {
     XRRPropertyInfo* info = XRRQueryOutputProperty(display, output, backlight);
-    
+
     if (!info || !(info->range && info->num_values == 2)) {
         return NULL;
     }
@@ -208,23 +208,23 @@ Backlight_get (Display* display, RROutput output, Atom backlight)
     unsigned long   items;
     unsigned long   after;
     unsigned char*  prop;
-    Atom	        type;
-    int		        format;
+    Atom            type;
+    int             format;
 
     long result;
-    
-	if (XRRGetOutputProperty(display, output, backlight, 0, 4, False, False, None, &type, &format, &items, &after, &prop) != Success) {
-	    return -1;
+
+    if (XRRGetOutputProperty(display, output, backlight, 0, 4, False, False, None, &type, &format, &items, &after, &prop) != Success) {
+        return -1;
     }
 
     if (type != XA_INTEGER || items != 1 || format != 32) {
-    	result = -1;
+        result = -1;
     }
     else {
         range = Backlight_range(display, output, backlight);
 
         if (range) {
-        	result = (*((long *) prop) - range->min) * 100 / (range->max - range->min);
+            result = (*((long *) prop) - range->min) * 100 / (range->max - range->min);
 
             free(range);
         }
