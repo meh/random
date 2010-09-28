@@ -20,7 +20,6 @@
 #include <math.h>
 #include <unistd.h>
 
-#include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/Xrandr.h>
 
@@ -80,6 +79,11 @@ main (int argc, char** argv) {
         }
     }
 
+    /* Force gamma if a parameter was given */
+    if (argc > 1) {
+        supported = false;
+    }
+
     if (supported) {
         for (screen = 0; screen < ScreenCount(display); screen++) {
             root      = RootWindow(display, screen);
@@ -113,6 +117,7 @@ main (int argc, char** argv) {
                 return -2;
             }
 
+            /* Colors gamma may be different, we just want to change brightness, so get the average */
             average = ((original.red + original.green + original.blue) / 3);
 
             Gamma_fade(display, screen, average, average + 5, 0.1, 0.005);
@@ -141,6 +146,7 @@ Gamma_fade (Display* display, int screen, double from, double to, double step, f
         for (i = from; i < to; i += step) {
             gamma.red = gamma.green = gamma.blue = i;
             XF86VidModeSetGamma(display, screen, &gamma);
+            /* For some reason you have to do a get to make the change effective */
             XF86VidModeGetGamma(display, screen, &gamma);
 
             usleep(interval * 1000000);
@@ -186,13 +192,14 @@ Backlight_supported (Display* display, RROutput output, Atom backlight)
 BacklightRange*
 Backlight_range (Display* display, RROutput output, Atom backlight)
 {
+    BacklightRange*  range;
     XRRPropertyInfo* info = XRRQueryOutputProperty(display, output, backlight);
 
     if (!info || !(info->range && info->num_values == 2)) {
         return NULL;
     }
 
-    BacklightRange* range = malloc(sizeof(BacklightRange));
+    range = malloc(sizeof(BacklightRange));
     range->min = info->values[0];
     range->max = info->values[1];
 
@@ -211,19 +218,18 @@ Backlight_get (Display* display, RROutput output, Atom backlight)
     Atom            type;
     int             format;
 
-    long result;
+    long result = -1;
 
     if (XRRGetOutputProperty(display, output, backlight, 0, 4, False, False, None, &type, &format, &items, &after, &prop) != Success) {
-        return -1;
+        return result;
     }
 
     if (type != XA_INTEGER || items != 1 || format != 32) {
         result = -1;
     }
     else {
-        range = Backlight_range(display, output, backlight);
-
-        if (range) {
+        if ((range = Backlight_range(display, output, backlight))) {
+            /* The real values are something on the lines of 0 .. 15, so we need a % */
             result = (*((long *) prop) - range->min) * 100 / (range->max - range->min);
 
             free(range);
@@ -244,6 +250,7 @@ Backlight_set (Display *display, RROutput output, Atom backlight, long value)
         return false;
     }
 
+    /* Same as with the get */
     value *= (range->max - range->min) / 100;
 
     XRRChangeOutputProperty(display, output, backlight, XA_INTEGER, 32, PropModeReplace, (unsigned char *) &value, 1);
