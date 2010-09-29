@@ -11,7 +11,8 @@
 **********************************************************************
 * gcc -o vbell vbell.c `pkg-config 'xrandr' --libs`                  *
 *                                                                    *
-* For gamma vbell support add -DGAMMA -lXxf86vm                      *
+* If you don't have a monitor with backlight support simply add      *
+* -DGAMMA -lXxf86vm to the compilation line                          *
 *********************************************************************/
 
 #include <stdio.h>
@@ -226,6 +227,7 @@ Gamma_fade (Display* display, int screen, double from, double to, double step, f
     else {
         gamma.red = gamma.green = gamma.blue = from;
         XF86VidModeSetGamma(display, screen, &gamma);
+        XF86VidModeGetGamma(display, screen, &gamma);
     }
 }
 
