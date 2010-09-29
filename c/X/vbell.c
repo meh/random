@@ -23,6 +23,10 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/Xrandr.h>
 
+bool locked (void);
+bool lock   (void);
+bool unlock (void);
+
 #ifdef GAMMA
 #   include <X11/extensions/xf86vmode.h>
 
@@ -63,6 +67,10 @@ main (int argc, char** argv) {
     double           average;
     bool             backlightPresent;
     #endif
+
+    if (locked() || !lock()) {
+        return 0;
+    }
 
     if ((display = XOpenDisplay(NULL)) == NULL) {
         fprintf(stderr, "Is X started?\n");
@@ -138,7 +146,54 @@ main (int argc, char** argv) {
     XSync(display, False);
     XCloseDisplay(display);
 
+    unlock();
+
     return 0;
+}
+
+bool
+locked (void)
+{
+    FILE* file = fopen("/tmp/.__meh_vbell", "r");
+    bool  result;
+
+    if (file) {
+        result = true;
+
+        fclose(file);
+    }
+    else {
+        result = false;
+    }
+
+    return result;
+}
+
+bool
+lock (void)
+{
+    FILE* file;
+
+    if (locked()) {
+        return false;
+    }
+
+    file = fopen("/tmp/.__meh_vbell", "w");
+    fclose(file);
+
+    return true;
+}
+
+bool
+unlock (void)
+{
+    if (!locked()) {
+        return false;
+    }
+
+    unlink("/tmp/.__meh_vbell");
+
+    return true;
 }
 
 #ifdef GAMMA
