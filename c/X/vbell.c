@@ -61,6 +61,7 @@ main (int argc, char** argv) {
     #ifdef GAMMA
     XF86VidModeGamma original;
     double           average;
+    bool             backlightPresent;
     #endif
 
     if ((display = XOpenDisplay(NULL)) == NULL) {
@@ -84,8 +85,12 @@ main (int argc, char** argv) {
         supported = false;
     }
 
-    if (supported) {
-        for (screen = 0; screen < ScreenCount(display); screen++) {
+    for (screen = 0; screen < ScreenCount(display); screen++) {
+        #ifdef GAMMA
+        backlightPresent = false;
+        #endif
+
+        if (supported) {
             root      = RootWindow(display, screen);
             resources = XRRGetScreenResources(display, root);
 
@@ -103,15 +108,16 @@ main (int argc, char** argv) {
                     Backlight_fade(display, output, backlight, 0,       100,     5, 0.005);
                     Backlight_fade(display, output, backlight, 100,     0,       5, 0.005);
                     Backlight_fade(display, output, backlight, 0,       current, 5, 0.005);
+
+                    #ifdef GAMMA
+                    backlightPresent = true;
+                    #endif
                 }
             }
         }
-    }
-    else {
-        #ifdef GAMMA
-        fprintf(stderr, "Dropping to gamma vbell.\n");
 
-        for (screen = 0; screen < ScreenCount(display); screen++) {
+        #ifdef GAMMA
+        if (!supported || !backlightPresent) {
             if (!XF86VidModeGetGamma(display, screen, &original)) {
                 fprintf(stderr, "Even gamma is not supported :(\n");
                 return -2;
