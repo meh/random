@@ -78,7 +78,7 @@ main (int argc, char** argv) {
         return -1;
     }
 
-    if (!XRRQueryVersion(display, &major, &minor) || (major < 1 || (major == 1 && minor < 2))) {
+    if (!XRRQueryVersion(display, &major, &minor) || (major < 1 || (major == 1 && minor < 3))) {
         fprintf(stderr, "XRandR too old.\n");
         supported = false;
     }
@@ -101,7 +101,7 @@ main (int argc, char** argv) {
 
         if (supported) {
             root      = RootWindow(display, screen);
-            resources = XRRGetScreenResources(display, root);
+            resources = XRRGetScreenResourcesCurrent(display, root);
 
             if (!resources) {
                 continue;
