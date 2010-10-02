@@ -9,7 +9,7 @@
 *                                                                    *
 *  0. You just DO WHAT THE FUCK YOU WANT TO.                         *
 **********************************************************************
-* gcc -o vbell vbell.c `pkg-config 'xrandr' --libs`                  *
+* gcc -o vbell vbell.c `pkg-config 'xrandr' --libs` -lm              *
 *                                                                    *
 * If you don't have a monitor with backlight support simply add      *
 * -DGAMMA -lXxf86vm to the compilation line                          *
@@ -42,8 +42,8 @@ typedef struct BacklightRange {
 Atom            Backlight_retrieve  (Display* display);
 bool            Backlight_supported (Display* display, RROutput output, Atom backlight);
 BacklightRange* Backlight_range     (Display* display, RROutput output, Atom backlight);
-long            Backlight_get       (Display* display, RROutput output, Atom backlight);
-bool            Backlight_set       (Display* display, RROutput output, Atom backlight, long value);
+double          Backlight_get       (Display* display, RROutput output, Atom backlight);
+bool            Backlight_set       (Display* display, RROutput output, Atom backlight, double value);
 void            Backlight_fade      (Display* display, RROutput output, Atom backlight, long from, long to, long step, double interval);
 
 int
@@ -53,7 +53,7 @@ main (int argc, char** argv) {
     Window              root;
     XRRScreenResources* resources;
     RROutput            output;
-    long                current;
+    double              current;
 
     int major;
     int minor;
@@ -278,7 +278,7 @@ Backlight_range (Display* display, RROutput output, Atom backlight)
     return range;
 }
 
-long
+double
 Backlight_get (Display* display, RROutput output, Atom backlight)
 {
     BacklightRange* range;
@@ -288,7 +288,7 @@ Backlight_get (Display* display, RROutput output, Atom backlight)
     Atom            type;
     int             format;
 
-    long result = -1;
+    double result = -1;
 
     if (XRRGetOutputProperty(display, output, backlight, 0, 4, False, False, None, &type, &format, &items, &after, &prop) != Success) {
         return result;
@@ -312,8 +312,9 @@ Backlight_get (Display* display, RROutput output, Atom backlight)
 }
 
 bool
-Backlight_set (Display *display, RROutput output, Atom backlight, long value)
+Backlight_set (Display *display, RROutput output, Atom backlight, double value)
 {
+    long            raw;
     BacklightRange* range = Backlight_range(display, output, backlight);
 
     if (range == NULL) {
@@ -322,8 +323,9 @@ Backlight_set (Display *display, RROutput output, Atom backlight, long value)
 
     /* Same as with the get */
     value *= (range->max - range->min) / 100;
+    raw    = ceil(value);
 
-    XRRChangeOutputProperty(display, output, backlight, XA_INTEGER, 32, PropModeReplace, (unsigned char *) &value, 1);
+    XRRChangeOutputProperty(display, output, backlight, XA_INTEGER, 32, PropModeReplace, (unsigned char *) &raw, 1);
 
     free(range);
 
