@@ -1,19 +1,18 @@
-/*********************************************************************
-*           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE              *
-*                   Version 2, December 2004                         *
-*                                                                    *
-*  Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]    *
-*                                                                    *
-*           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE              *
-*  TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION   *
-*                                                                    *
-*  0. You just DO WHAT THE FUCK YOU WANT TO.                         *
-**********************************************************************
-* gcc -o vbell vbell.c `pkg-config 'xrandr' --libs` -lm              *
-*                                                                    *
-* If you don't have a monitor with backlight support simply add      *
-* -DGAMMA -lXxf86vm to the compilation line                          *
-*********************************************************************/
+/*           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ *                   Version 2, December 2004
+ *
+ *  Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]
+ *
+ *           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ *  TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+ *
+ *  0. You just DO WHAT THE FUCK YOU WANT TO.
+ **********************************************************************
+ * gcc -o vbell vbell.c `pkg-config 'xrandr' --libs` -lm
+ *
+ * If you don't have a monitor with backlight support simply add
+ * -DGAMMA -lXxf86vm to the compilation line
+ *********************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
