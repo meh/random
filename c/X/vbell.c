@@ -14,14 +14,20 @@
  * -DGAMMA -lXxf86vm to the compilation line
  *********************************************************************/
 
+#define __USE_BSD
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include <X11/Xatom.h>
 #include <X11/extensions/Xrandr.h>
+
+void catch (int number);
+void initializeCatching (sig_t handler);
 
 bool locked (void);
 bool lock   (void);
@@ -68,12 +74,15 @@ main (int argc, char** argv) {
     bool             backlightPresent;
     #endif
 
+    initializeCatching(catch);
+
     if (locked() || !lock()) {
         return 0;
     }
 
     if ((display = XOpenDisplay(NULL)) == NULL) {
         fprintf(stderr, "Is X started?\n");
+        unlock();
         return -1;
     }
 
@@ -134,7 +143,7 @@ main (int argc, char** argv) {
         if (!supported || !backlightPresent) {
             if (!XF86VidModeGetGamma(display, screen, &original)) {
                 fprintf(stderr, "Even gamma is not supported :(\n");
-                return -2;
+                continue;
             }
 
             /* Colors gamma may be different, we just want to change brightness, so get the average */
@@ -155,6 +164,27 @@ main (int argc, char** argv) {
     unlock();
 
     return 0;
+}
+
+void
+catch (int number)
+{
+    unlock();
+    exit(255);
+}
+
+void
+initializeCatching (sig_t handler)
+{
+    static int signals[] = {
+        SIGSEGV, SIGABRT, SIGFPE, SIGILL, SIGINT, SIGTERM
+    };
+
+    int i;
+
+    for (i = 0; i < sizeof(signals) / sizeof(*signals); i++) {
+        signal(signals[i], catch);
+    }
 }
 
 bool

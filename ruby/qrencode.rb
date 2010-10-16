@@ -17,6 +17,8 @@ require 'optimus'
 require 'rqrcode'
 require 'chunky_png'
 
+BORDER = 1
+
 opt = Optimus.new {|o|
   o.set(
     :type => :numeric,
@@ -66,13 +68,13 @@ if !opt.params[:output]
 
   puts "\n\n\n"
 else
-  size = (3 * 2) + (code.module_count)
+  size = (BORDER * 2) + (code.module_count)
 
   img = ChunkyPNG::Image.new(size, size, ChunkyPNG::Color::WHITE)
 
-  code.modules.reverse.each_with_index {|row, y|
+  code.modules.each_with_index {|row, y|
     row.each_with_index {|col, x|
-      img[x + 3, y + 3] = ChunkyPNG::Color::BLACK if col
+      img[x + BORDER, y + BORDER] = ChunkyPNG::Color::BLACK if col
     }
   }
 

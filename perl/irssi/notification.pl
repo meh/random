@@ -54,7 +54,7 @@ sub can_notify {
     my @notify = split /\s*[:,]\s*/, Irssi::settings_get_str('notify_only');
     if ($#notify >= 0) {
         for my $expression (@notify) {
-            if ($on =~ /$expression/) {
+            if (eval { $on =~ /$expression/; }) {
                 return 1;
             }
         }
@@ -65,7 +65,7 @@ sub can_notify {
     my @ignores = split /\s*[:,]\s*/, Irssi::settings_get_str('ignore_notifications_from');
     if ($#ignores >= 0) {
         for my $expression (@ignores) {
-            if ($on =~ /$expression/) {
+            if (eval { $on =~ /$expression/; }) {
                 return 0;
             }
         }
@@ -144,7 +144,7 @@ Irssi::signal_add 'message public' => sub {
 
     if (Irssi::settings_get_str('always_notify')) {
         for my $expression (split /\s*[:,]\s*/, Irssi::settings_get_str('always_notify')) {
-            if (($target.'@'.$server->{tag}) =~ m{$expression}) {
+            if (eval { ($target.'@'.$server->{tag}) =~ /$expression/; }) {
                 notify($target, $server->{tag});
                 return;
             }
