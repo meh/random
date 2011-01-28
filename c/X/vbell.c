@@ -26,6 +26,10 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/Xrandr.h>
 
+// The difference between start and max gamma
+#define GAMMA_DELTA 3
+#define STEP        0.1
+
 void catch (int number);
 void initializeCatching (sig_t handler);
 
