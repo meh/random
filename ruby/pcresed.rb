@@ -3,45 +3,69 @@ require 'open-uri'
 
 options = {
   :replace => false,
-  :regexps  => []
+  :regexps => [],
+  :files   => []
 }
 
 skip = false
 ARGV.each_with_index {|option, index|
-  skip = false and next if skip
+  if skip
+    skip = false
+    next
+  end
 
   case option
-    when '-i' then options[:replace] = true
-    when '-e' then options[:regexps].push(ARGV[index + 1]) and skip = true
-    when /^-/ then fail "#{option}: Unknown option"
-    else           options[:uri] = option
+    when '-i'
+      options[:replace] = true
+
+    when '-e'
+      options[:regexps].push(ARGV[index + 1])
+      skip = true
+
+    when /^-/
+      fail "#{option}: Unknown option"
+
+    else
+      options[:files].push(option)
   end
 }
 
-data = if IO.select([STDIN], nil, nil, 0)
-  STDIN.read
-elsif options[:uri]
-  open(options[:uri]).read
-else
-  fail "What should I read?"
+options[:files].map! {|file|
+  [file, open(file) {|f|
+    f.read
+  }]
+}
+
+if IO.select([STDIN], nil, nil, 0)
+  options[:files].push [STDIN, STDIN.read]
+elsif options[:files].empty?
+  fail "What should I work on?"
 end
 
-options[:regexps].each {|regex|
-  case regex
-    when /^s(.)(.*?)\1(.*?)\1([gi]?)$/
-      ($4.include?('g') ? data.method(:gsub!) : data.method(:sub!)).call(Regexp.new($2, $4), $3)
+options[:files].each {|(path, data)|
+  options[:regexps].each {|regex|
+    case regex
+      when /^s(.)(.*?)\1(.*?)\1([gi]?)$/
+        ($4.include?('g') ? data.method(:gsub!) : data.method(:sub!)).call(Regexp.new($2, $4), $3)
 
-    when /^d(.)(.*?)\1([gi]?)$/
-      ($4.include?('g') ? data.method(:gsub!) : data.method(:sub!)).call(Regexp.new($2, $4), '')
-
-  end
+      when /^d(.)(.*?)\1([gi]?)$/
+        ($4.include?('g') ? data.method(:gsub!) : data.method(:sub!)).call(Regexp.new($2, $4), '')
+    end
+  }
 }
 
-if options[:replace] && options[:uri]
-  File.open(options[:uri], 'w') {|f|
-    f.write(data)
+if options[:replace]
+  options[:files].each {|(path, data)|
+    next if path == STDIN
+
+    open(path, 'w') {|f|
+      f.write(data)
+    }
   }
 else
-  print data
+  options[:files].each {|(path, data)|
+    print data
+  }
+
   STDOUT.flush
 end
