@@ -1,4 +1,3 @@
-#!/utsr/bin/perl
 # Perl script to output the notifications, usable with a screen backtick
 # ---
 # my $notifications = '';
