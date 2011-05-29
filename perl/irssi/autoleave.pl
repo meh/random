@@ -4,8 +4,6 @@ use Irssi;
 use Irssi::TextUI;
 use vars qw($VERSION %IRSSI);
 
-use Data::Dumper;
-
 $VERSION = '0.1';
 %IRSSI = (
     author      => 'meh',
@@ -17,8 +15,6 @@ $VERSION = '0.1';
 
 sub leave {
     $channel = shift;
-
-    print Dumper $channel;
 
     for my $chan (split /\s+/, Irssi::settings_get_str('autoleave_channels')) {
         $name, $server = split /@/, $chan;
@@ -35,8 +31,9 @@ Irssi::signal_add 'channel joined' => sub {
     $joined = shift || return 0;
 
     if (leave($joined)) {
-        $joined->destroy();
+        $joined->{server}->send_raw("PART $joined->{name}");
     }
 };
 
 Irssi::settings_add_str('autoleave', 'autoleave_channels', '');
+Irssi::settings_add_str('autoleave', 'autoleave_message', 'leaving');
