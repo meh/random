@@ -31,7 +31,7 @@ Irssi::signal_add 'channel joined' => sub {
     $joined = shift || return 0;
 
     if (leave($joined)) {
-        $joined->{server}->send_raw("PART $joined->{name}");
+        $joined->{server}->send_raw("PART $joined->{name} :" . Irssi::settings_get_str('autoleave_message'));
     }
 };
 
