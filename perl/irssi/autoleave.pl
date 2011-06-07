@@ -19,7 +19,7 @@ sub leave {
     for my $chan (split /\s+/, Irssi::settings_get_str('autoleave_channels')) {
         my ($name, $server) = split /@/, $chan;
 
-        if ($channel->{name} eq $name && $channel->{server}->{chatnet} eq $server) {
+        if ($channel->{name} eq $name and (not $server or $channel->{server}->{chatnet} eq $server)) {
             return 1;
         }
     }
