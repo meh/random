@@ -45,13 +45,18 @@ function getRequest ($name)
 }
 
 $Config = array(
-    host     => 'localhost',
-    username => 'root',
-    password => 'lolwut',
-    database => 'hashes',
+    'host'     => 'localhost',
+    'username' => 'root',
+    'password' => 'lolwut',
+    'database' => 'hashes',
 );
 
 if (isset($_REQUEST['decrypt'])) {
+    if (!function_exists('mysql_connect')) {
+        echo 'You can crack the hash only with MySQL support.';
+        exit;
+    }
+
     mysql_connect($Config['host'], $Config['username'], $Config['password']);
     mysql_select_db($Config['database']);
 
@@ -89,7 +94,7 @@ if (isset($_REQUEST['decrypt'])) {
             }
 
             $hash = hash($Type, $result);
-            mysql_query(str_replace(array('%HASH%', '%TEXT%'), array($hash, $result), $query));
+            mysql_query(str_replace(array('%HASH%', '%TEXT%'), array_map('mysql_real_escape_string', array($hash, $result)), $query));
 
             if ($hash == $Hash) {
                 break 2;
@@ -110,15 +115,18 @@ if (isset($_REQUEST['decrypt'])) {
 }
 else if (isset($_REQUEST['crypt'])) {
     $Hash = hash($_REQUEST['type'], getRequest('text'));
-    $Text = mysql_real_escape_string(getRequest('text'));
-    $Type = mysql_real_escape_string(getRequest('type'));
 
-    $query = "INSERT IGNORE INTO `hashes` VALUES('{$Hash}', '{$Text}', '{$Type}')";
+    if (function_exists('mysql_connect')) {
+        $Text = mysql_real_escape_string(getRequest('text'));
+        $Type = mysql_real_escape_string(getRequest('type'));
 
-    mysql_connect($Config['host'], $Config['username'], $Config['password']);
-    mysql_select_db($Config['database']);
+        $query = "INSERT IGNORE INTO `hashes` VALUES('{$Hash}', '{$Text}', '{$Type}')";
 
-    mysql_query($query);
+        mysql_connect($Config['host'], $Config['username'], $Config['password']);
+        mysql_select_db($Config['database']);
+
+        mysql_query($query);
+    }
 
     echo $Hash;
 }
