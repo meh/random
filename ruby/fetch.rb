@@ -20,11 +20,11 @@ match = Regexp.new(ARGV.shift || '\.(jpg|png|gif|jpeg)$')
 puts "Matching with #{match.inspect}"
 
 URI.extract(Net::HTTP.get(url)) {|url|
-    if url.match(match)
-        puts "Downloading #{url}"
+  next unless url.match(match)
 
-        file = File.new(File.basename(url), 'w')
-        file.write(Net::HTTP.get(URI.parse(url)))
-        file.close
-    end
+  puts "Downloading #{url}"
+
+  File.open(File.basename(url), 'w') {|f|
+    f.write(Net::HTTP.get(URI.parse(url)))
+  }
 }
