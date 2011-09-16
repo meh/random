@@ -66,7 +66,7 @@ def fetch (url, options)
 		puts "Downloading #{url}"
 
 		File.open(file, 'w') {|f|
-			f.write(Net::HTTP.get(URI.parse(url)))
+			f.write(open(URI.parse(url)).read)
 		}
 	}
 end
