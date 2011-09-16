@@ -11,20 +11,66 @@
 # 0. You just DO WHAT THE FUCK YOU WANT TO.
 ####################################################################
 
-require 'uri'
-require 'net/http'
+require 'optparse'
+require 'open-uri'
 
-url   = URI.parse(ARGV.shift)
-match = Regexp.new(ARGV.shift || '\.(jpg|png|gif|jpeg)$')
+options = {}
 
-puts "Matching with #{match.inspect}"
+OptionParser.new do |o|
+	options[:urls]      = []
+	options[:regexes]   = []
+	options[:recursive] = []
 
-URI.extract(Net::HTTP.get(url)) {|url|
-  next unless url.match(match)
+	o.on '-u', '--url URL...', Array, 'URLs to fetch from' do |urls|
+		options[:urls].push *urls.map { |url| URI.parse(url) }
+	end
 
-  puts "Downloading #{url}"
+	o.on '-e', '--regexes REGEX...', Array, 'regexps to choose to match' do |regexes|
+		options[:regexes].push *regexes.map { |regex| Regexp.new(regex) }
+	end
 
-  File.open(File.basename(url), 'w') {|f|
-    f.write(Net::HTTP.get(URI.parse(url)))
-  }
+	o.on '-r', '--recursive [REGEX...]', Array, 'match into the following recursive stuff' do |recursive|
+		if recursive.empty?
+			options[:recursive].push /(?i)\.(^jpg|png|gif|jpeg)$/
+		else
+			options[:recursive].push *recursive.map { |regex| Regexp.new(regex) }
+		end
+	end
+end
+
+options[:urls].push(URI.parse(ARGV.shift))
+
+if options[:regexes].empty? && ARGV.empty?
+	options[:regexes].push /(?i)\.(jpg|png|gif|jpeg)$/
+else
+	options[:regexes].push(*ARGV.map { |regex| Regexp.new(regex) })
+end
+
+puts "Matching with #{options[:regexes].join('; ')}"
+
+def fetch (url, options)
+	URI.extract(open(url).read).uniq.each {|url|
+		if options[:recursive].any? { |re| url.match(re) }
+			fetch(url)
+		end
+
+		next unless options[:regexes].any? { |re| url.match(re) }
+
+		file = File.basename(url.sub(/\?.*$/, ''))
+
+		if File.exist?(file)
+			puts "File #{file} already exists"
+			next
+		end
+
+		puts "Downloading #{url}"
+
+		File.open(file, 'w') {|f|
+			f.write(Net::HTTP.get(URI.parse(url)))
+		}
+	}
+end
+
+options[:urls].each {|url|
+	fetch(url, options)
 }
