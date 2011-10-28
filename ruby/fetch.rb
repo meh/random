@@ -12,7 +12,7 @@
 ####################################################################
 
 require 'optparse'
-require 'open-uri'
+require 'mechanize'
 
 options = {}
 
@@ -22,7 +22,7 @@ OptionParser.new do |o|
 	options[:recursive] = []
 
 	o.on '-u', '--url URL...', Array, 'URLs to fetch from' do |urls|
-		options[:urls].push *urls.map { |url| URI.parse(url) }
+		options[:urls].push *urls
 	end
 
 	o.on '-e', '--regexes REGEX...', Array, 'regexps to choose to match' do |regexes|
@@ -36,9 +36,11 @@ OptionParser.new do |o|
 			options[:recursive].push *recursive.map { |regex| Regexp.new(regex) }
 		end
 	end
-end
+end.parse!
 
-options[:urls].push(URI.parse(ARGV.shift))
+if options[:urls].empty?
+	options[:urls].push ARGV.shift
+end
 
 if options[:regexes].empty? && ARGV.empty?
 	options[:regexes].push /(?i)\.(jpg|png|gif|jpeg)$/
@@ -48,29 +50,32 @@ end
 
 puts "Matching with #{options[:regexes].join('; ')}"
 
-def fetch (url, options)
-	URI.extract(open(url).read).uniq.each {|url|
-		if options[:recursive].any? { |re| url.match(re) }
-			fetch(url)
+agent = Mechanize.new
+
+def fetch (page, options)
+	page.links.uniq.each {|link|
+		if options[:recursive].any? { |re| link.href.match(re) }
+			fetch(link.click, options)
 		end
 
-		next unless options[:regexes].any? { |re| url.match(re) }
+		next unless options[:regexes].any? { |re| link.href.match(re) }
 
-		file = File.basename(url.sub(/\?.*$/, ''))
+		file = File.basename(link.href.sub(/\?.*$/, ''))
 
 		if File.exist?(file)
 			puts "File #{file} already exists"
+
 			next
 		end
 
-		puts "Downloading #{url}"
+		puts "Downloading #{link.href}"
 
 		File.open(file, 'w') {|f|
-			f.write(open(URI.parse(url)).read)
+			f.write(link.click.content)
 		}
 	}
 end
 
 options[:urls].each {|url|
-	fetch(url, options)
+	fetch(agent.get(url), options)
 }
