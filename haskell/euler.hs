@@ -30,6 +30,14 @@ euler 5 = toInteger $ fromJust $ find evenlyDivisible [1..]
 
     fromJust (Just x) = x
 
+euler 6 = (squareOfSum [1 .. 100]) - (sumOfSquares [1 .. 100])
+  where
+    sumOfSquares :: [Int] -> Integer
+    sumOfSquares xs = toInteger $ sum $ map (\ n -> n ^ 2) xs
+
+    squareOfSum :: [Int] -> Integer
+    squareOfSum xs = toInteger $ (sum xs) ^ 2
+
 euler n = error $ "no euler problem solved for " ++ show n
 
 main = do
