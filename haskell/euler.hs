@@ -1,4 +1,5 @@
 import System (getArgs)
+import List (find)
 
 euler :: Int -> Integer
 
@@ -21,6 +22,13 @@ euler 4 = toInteger $ maximum $ filter (isPalindromic) [x * y | x <- [111 .. 999
   where
     isPalindromic :: Int -> Bool
     isPalindromic x = (show x) == reverse (show x)
+
+euler 5 = toInteger $ fromJust $ find evenlyDivisible [1..]
+  where
+    evenlyDivisible :: Int -> Bool
+    evenlyDivisible x = all (\ n -> x `mod` n == 0) [1 .. 20]
+
+    fromJust (Just x) = x
 
 euler n = error $ "no euler problem solved for " ++ show n
 
