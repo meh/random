@@ -38,6 +38,10 @@ euler 6 = (squareOfSum [1 .. 100]) - (sumOfSquares [1 .. 100])
     squareOfSum :: [Int] -> Integer
     squareOfSum xs = toInteger $ (sum xs) ^ 2
 
+euler 7 = toInteger $ primes !! 10001
+  where
+    primes = [x | x <- [1 ..], all (\ n -> x `mod` n /= 0) [2 .. x - 1]]
+
 euler n = error $ "no euler problem solved for " ++ show n
 
 main = do
