@@ -1,6 +1,7 @@
 import System (getArgs)
 import List (find)
 import Char (digitToInt)
+import Data.Numbers.Primes (primes, primeFactors)
 
 euler :: Int -> Integer
 
@@ -11,13 +12,14 @@ euler 2 = sum [x | x <- takeWhile (< 4000000) fibonacci, even x]
     fibonacci :: [Integer]
     fibonacci = 0 : 1 : zipWith (+) fibonacci (tail fibonacci)
 
-euler 3 = toInteger $ maximum $ filter (isPrime) (factorsOf 600851475143)
-  where
-    factorsOf :: Int -> [Int]
-    factorsOf x = filter (\ n -> x `mod` n == 0) [2 .. floor $ sqrt $ fromIntegral x]
-
-    isPrime :: Int -> Bool
-    isPrime x = all (\ n -> x `mod` n /= 0) (takeWhile (< x) [2..])
+euler 3 = toInteger $ maximum $ primeFactors 600851475143
+-- euler 3 = toInteger $ maximum $ filter (isPrime) (factorsOf 600851475143)
+--  where
+--    factorsOf :: Int -> [Int]
+--    factorsOf x = filter (\ n -> x `mod` n == 0) [2 .. floor $ sqrt $ fromIntegral x]
+--
+--    isPrime :: Int -> Bool
+--    isPrime x = all (\ n -> x `mod` n /= 0) (takeWhile (< x) [2..])
 
 euler 4 = toInteger $ maximum $ filter (isPalindromic) [x * y | x <- [111 .. 999], y <- [111 .. 999]]
   where
@@ -26,10 +28,10 @@ euler 4 = toInteger $ maximum $ filter (isPalindromic) [x * y | x <- [111 .. 999
 
 euler 5 = toInteger $ fromJust $ find evenlyDivisible [1..]
   where
+    fromJust (Just x) = x
+
     evenlyDivisible :: Int -> Bool
     evenlyDivisible x = all (\ n -> x `mod` n == 0) [1 .. 20]
-
-    fromJust (Just x) = x
 
 euler 6 = (squareOfSum [1 .. 100]) - (sumOfSquares [1 .. 100])
   where
@@ -40,8 +42,8 @@ euler 6 = (squareOfSum [1 .. 100]) - (sumOfSquares [1 .. 100])
     squareOfSum xs = toInteger $ (sum xs) ^ 2
 
 euler 7 = toInteger $ primes !! 10001
-  where
-    primes = [x | x <- [1 ..], all (\ n -> x `mod` n /= 0) [2 .. x - 1]]
+--  where
+--    primes = [x | x <- [1 ..], all (\ n -> x `mod` n /= 0) [2 .. x `quot` 2]]
 
 euler 8 = toInteger $ maximum $ fiveDigitProduct hugeNumber
   where
@@ -70,6 +72,19 @@ euler 8 = toInteger $ maximum $ fiveDigitProduct hugeNumber
       "8458015616609791913387549920052406368991256071760d" ++
       "0588611646710940507754100225698315520005593572972d" ++
       "71636269561882670428252483600823257530420752963450"
+
+euler 9 = toInteger $ productTuple $ fromJust $ find (\ (a, b, c) -> a + b + c == 1000) (pythagoreanTripletsUpTo 1000)
+  where
+    fromJust (Just x) = x
+
+    pythagoreanTripletsUpTo :: Int -> [(Int, Int, Int)]
+    pythagoreanTripletsUpTo x = [(a, b, c) | a <- [1 .. x], b <- [a + 1 .. x], c <- [b + 1 .. x], a < b, b < c, a ^ 2 + b ^ 2 == c ^ 2]
+
+    productTuple (a, b, c) = a * b * c
+
+euler 10 = toInteger $ sum (takeWhile (< 2000000) primes)
+--  where
+--    primes = [x | x <- [1 ..], all (\ n -> x `mod` n /= 0) [2 .. x `quot` 2]]
 
 euler n = error $ "no euler problem solved for " ++ show n
 
