@@ -1,4 +1,7 @@
-rle :: (Eq a) => [a] -> [(Int, a)]
-rle [] = []
-rle xs = (length $ takeWhile (== value) xs, value) : rle (dropWhile (== value) xs)
-  where value = head xs
+import List
+
+encode :: (Eq a) => [a] -> [(Int, a)]
+encode = map (\ xs -> (length xs, head xs)) . group
+
+decode :: [(Int, a)] -> [a]
+decode = concatMap (uncurry replicate)
