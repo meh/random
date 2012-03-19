@@ -8,7 +8,7 @@
  *
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  **********************************************************************
- * gcc -o vbell vbell.c `pkg-config 'xrandr' --libs` -lm
+ * gcc -o vbell vbell.c `pkg-config 'xrandr' --libs` -lX11 -lm
  *
  * If you don't have a monitor with backlight support simply add
  * -DGAMMA -lXxf86vm to the compilation line
