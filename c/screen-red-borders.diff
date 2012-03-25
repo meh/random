@@ -1,0 +1,13 @@
+diff --git a/src/ansi.c b/src/ansi.c
+index d88e153..5234c30 100644
+--- a/src/ansi.c
++++ b/src/ansi.c
+@@ -76,7 +76,7 @@ struct mline mline_null;
+ 
+ struct mchar mchar_null;
+ struct mchar mchar_blank = {' ' /* , 0, 0, ... */};
+-struct mchar mchar_so    = {' ', A_SO /* , 0, 0, ... */};
++struct mchar mchar_so    = {' ', A_SO, 0, 8/*, ... */};
+ 
+ int renditions[NUM_RENDS] = {65529 /* =ub */, 65531 /* =b */, 65533 /* =u */ };
+ 
