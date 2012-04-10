@@ -1,18 +1,18 @@
 # Perl script to output the notifications, usable with a screen backtick
 # ---
 # my $notifications = '';
-# 
+#
 # open $FILE, '<', "$ENV{HOME}/.irssi/notifications";
 # my $content = <$FILE>;
-# 
+#
 # $content =~ s/:/@/g;
-# 
+#
 # for my $notification (split /, /, $content) {
 #     $notifications .= "\005{= rW}$notification\005{= dd} ";
 # }
-# 
+#
 # $notifications =~ s/ $//;
-# 
+#
 # if ($notifications) {
 #     print "\005{= r}[\005{= W}IRC: $notifications\005{= dr}]";
 # }
@@ -27,158 +27,158 @@ use vars qw($VERSION %IRSSI);
 
 $VERSION = '0.1';
 %IRSSI = (
-    author      => 'meh',
-    contact     => 'meh.ffff@gmail.com',
-    name        => 'notification',
-    description => 'Alert when you receive a query or highlight message.',
-    license     => 'AGPLv3',
+	author      => 'meh',
+	contact     => 'meh.ffff@gmail.com',
+	name        => 'notification',
+	description => 'Alert when you receive a query or highlight message.',
+	license     => 'AGPLv3',
 );
 
 unlink "$ENV{'HOME'}/.irssi/notifications";
 
 sub wildcard {
-    my $value = shift;
+	my $value = shift;
 
-    $value =~ s/\*/.*?/;
-    $value =~ s/\?/./;
+	$value =~ s/\*/.*?/;
+	$value =~ s/\?/./;
 
-    return $value;
+	return $value;
 }
 
 sub can_notify {
-    my $name   = shift || return 0;
-    my $server = shift || return 0;
-    my $on     = $name.'@'.$server;
+	my $name   = shift || return 0;
+	my $server = shift || return 0;
+	my $on     = $name.'@'.$server;
 
-    my @notify = split /\s*[:,]\s*/, Irssi::settings_get_str('notify_only');
-    if ($#notify >= 0) {
-        for my $expression (@notify) {
-            if (eval { $on =~ /$expression/; }) {
-                return 1;
-            }
-        }
+	my @notify = split /\s*[:,]\s*/, Irssi::settings_get_str('notify_only');
+	if ($#notify >= 0) {
+		for my $expression (@notify) {
+			if (eval { $on =~ /$expression/; }) {
+				return 1;
+			}
+		}
 
-        return 0;
-    }
+		return 0;
+	}
 
-    my @ignores = split /\s*[:,]\s*/, Irssi::settings_get_str('ignore_notifications_from');
-    if ($#ignores >= 0) {
-        for my $expression (@ignores) {
-            if (eval { $on =~ /$expression/; }) {
-                return 0;
-            }
-        }
-    }
+	my @ignores = split /\s*[:,]\s*/, Irssi::settings_get_str('ignore_notifications_from');
+	if ($#ignores >= 0) {
+		for my $expression (@ignores) {
+			if (eval { $on =~ /$expression/; }) {
+				return 0;
+			}
+		}
+	}
 
-    return 1;
+	return 1;
 }
 
 sub notify {
-    my $name   = shift || return 0;
-    my $server = shift || return 0;
-    my $clean  = shift || 0;
+	my $name   = shift || return 0;
+	my $server = shift || return 0;
+	my $clean  = shift || 0;
 
-    if (!$clean) {
-        notify($name, $server, 1);
+	if (!$clean) {
+		notify($name, $server, 1);
 
-        if (not can_notify($name, $server)) {
-            return 0;
-        }
+		if (not can_notify($name, $server)) {
+			return 0;
+		}
 
-        system(Irssi::settings_get_str('command_on_notification'));
+		system(Irssi::settings_get_str('command_on_notification'));
 
-        open my $FILE, '>>', "$ENV{'HOME'}/.irssi/notifications";
-        print $FILE "$name:$server, ";
-        close $FILE;
-    }
-    else {
-        open my $FILE, '<', "$ENV{'HOME'}/.irssi/notifications";
-        my $content = <$FILE>;
-        close $FILE;
+		open my $FILE, '>>', "$ENV{'HOME'}/.irssi/notifications";
+		print $FILE "$name:$server, ";
+		close $FILE;
+	}
+	else {
+		open my $FILE, '<', "$ENV{'HOME'}/.irssi/notifications";
+		my $content = <$FILE>;
+		close $FILE;
 
-        $name   = wildcard($name);
-        $server = wildcard($server);
+		$name   = wildcard($name);
+		$server = wildcard($server);
 
-        my $tmp = $content;
-        $content =~ s/\Q$name:$server\E, //;
+		my $tmp = $content;
+		$content =~ s/\Q$name:$server\E, //;
 
-        if ($content ne $tmp) {
-            open $FILE, '>', "$ENV{'HOME'}/.irssi/notifications";
-            print $FILE $content;
-            close $FILE;
-        }
-    }
+		if ($content ne $tmp) {
+			open $FILE, '>', "$ENV{'HOME'}/.irssi/notifications";
+			print $FILE $content;
+			close $FILE;
+		}
+	}
 
-    return 1;
+	return 1;
 }
 
 Irssi::signal_add 'print text' => sub {
-    my ($dest, $text, $stripped) = @_;
+	my ($dest, $text, $stripped) = @_;
 
-    if (!Irssi::settings_get_bool('current_window_notification')) {
-        my $win = !Irssi::active_win() ? undef : Irssi::active_win()->{active};
+	if (!Irssi::settings_get_bool('current_window_notification')) {
+		my $win = !Irssi::active_win() ? undef : Irssi::active_win()->{active};
 
-        if (ref $win) {
-            if ($dest->{target} eq $win->{name} && $dest->{server}->{tag} eq $win->{server}->{tag}) {
-                return;
-            }
-        }
-    }
+		if (ref $win) {
+			if ($dest->{target} eq $win->{name} && $dest->{server}->{tag} eq $win->{server}->{tag}) {
+				return;
+			}
+		}
+	}
 
-    if ($dest->{level} & (MSGLEVEL_HILIGHT)) {
-        notify($dest->{target}, $dest->{server}->{tag});
-    }
-    elsif (($dest->{level} & (MSGLEVEL_MSGSMSGLEVEL_HILIGHT | MSGLEVEL_MSGS)) && ($dest->{level} & MSGLEVEL_NOHILIGHT) == 0) {
-        notify($dest->{target}, $dest->{server}->{tag});
-    }
+	if ($dest->{level} & (MSGLEVEL_HILIGHT)) {
+		notify($dest->{target}, $dest->{server}->{tag});
+	}
+	elsif (($dest->{level} & (MSGLEVEL_MSGSMSGLEVEL_HILIGHT | MSGLEVEL_MSGS)) && ($dest->{level} & MSGLEVEL_NOHILIGHT) == 0) {
+		notify($dest->{target}, $dest->{server}->{tag});
+	}
 };
 
 Irssi::signal_add 'message public' => sub {
-    my ($server, $msg, $nick, $address, $target) = @_;
+	my ($server, $msg, $nick, $address, $target) = @_;
 
-    if (Irssi::settings_get_bool('always_notify_everything')) {
-        notify($target, $server->{tag});
-        return;
-    }
+	if (Irssi::settings_get_bool('always_notify_everything')) {
+		notify($target, $server->{tag});
+		return;
+	}
 
-    if (Irssi::settings_get_str('always_notify')) {
-        for my $expression (split /\s*[:,]\s*/, Irssi::settings_get_str('always_notify')) {
-            if (eval { ($target.'@'.$server->{tag}) =~ /$expression/; }) {
-                notify($target, $server->{tag});
-                return;
-            }
-        }
-    }
+	if (Irssi::settings_get_str('always_notify')) {
+		for my $expression (split /\s*[:,]\s*/, Irssi::settings_get_str('always_notify')) {
+			if (eval { ($target.'@'.$server->{tag}) =~ /$expression/; }) {
+				notify($target, $server->{tag});
+				return;
+			}
+		}
+	}
 };
 
 Irssi::signal_add 'send text' => sub {
-    my ($text, $server, $window) = @_;
+	my ($text, $server, $window) = @_;
 
-    if ($window->{name}) {
-        notify($window->{name}, $window->{server}->{tag}, 1);
-    }
+	if ($window->{name}) {
+		notify($window->{name}, $window->{server}->{tag}, 1);
+	}
 };
 
 Irssi::signal_add 'window changed' => sub {
-    my ($current, $old) = @_;
+	my ($current, $old) = @_;
 
-    if ($current->{active}->{name}) {
-        notify($current->{active}->{name}, $current->{active}->{server}->{tag}, 1);
-    }
+	if ($current->{active}->{name}) {
+		notify($current->{active}->{name}, $current->{active}->{server}->{tag}, 1);
+	}
 };
 
 Irssi::signal_add 'server quit' => sub {
-    my ($server, $message) = @_;
+	my ($server, $message) = @_;
 
-    notify('*', $server->{tag}, 1);
+	notify('*', $server->{tag}, 1);
 };
 
 Irssi::signal_add 'gui exit' => sub {
-    unlink("$ENV{'HOME'}/.irssi/notifications");
+	unlink("$ENV{'HOME'}/.irssi/notifications");
 };
 
 Irssi::command_bind 'clear_notifications' => sub {
-    unlink("$ENV{'HOME'}/.irssi/notifications");
+	unlink("$ENV{'HOME'}/.irssi/notifications");
 };
 
 # Notify even if the highlight came from the active window
