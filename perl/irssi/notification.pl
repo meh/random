@@ -120,10 +120,8 @@ Irssi::signal_add 'print text' => sub {
 	if (!Irssi::settings_get_bool('current_window_notification')) {
 		my $win = !Irssi::active_win() ? undef : Irssi::active_win()->{active};
 
-		if (ref $win) {
-			if ($dest->{target} eq $win->{name} && $dest->{server}->{tag} eq $win->{server}->{tag}) {
-				return;
-			}
+		if (ref $win && $dest->{target} eq $win->{name} && $dest->{server}->{tag} eq $win->{server}->{tag}) {
+			return;
 		}
 	}
 
@@ -139,6 +137,17 @@ Irssi::signal_add 'message public' => sub {
 	my ($server, $msg, $nick, $address, $target) = @_;
 
 	if (Irssi::settings_get_bool('always_notify_everything')) {
+		notify($target, $server->{tag});
+		return;
+	}
+
+	if (Irssi::settings_get_bool('always_notify_current_window')) {
+		my $win = !Irssi::active_win() ? undef : Irssi::active_win()->{active};
+
+		unless (ref $win && $target eq $win->{name} && $server->{tag} eq $win->{server}->{tag}) {
+			return;
+		}
+
 		notify($target, $server->{tag});
 		return;
 	}
@@ -193,7 +202,7 @@ Irssi::settings_add_str('notification', 'always_notify', '');
 Irssi::settings_add_bool('notification', 'always_notify_everything', 'false');
 
 # Notify on every message (even not highlights) on the active window
-Irssi::settings_add_bool('notification', 'always_notify_active', 'false');
+Irssi::settings_add_bool('notification', 'always_notify_current_window', 'false');
 
 # Ignore notifications from the wildcard matching windows
 Irssi::settings_add_str('notification', 'ignore_notifications_from', '');
