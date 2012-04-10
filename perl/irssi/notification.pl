@@ -86,7 +86,7 @@ sub notify {
 		}
 
 		if (my $command = Irssi::settings_get_str('command_on_notification')) {
-			`$command 2>&1 &`;
+			system("$command &> /dev/null &");
 		}
 
 		open my $FILE, '>>', "$ENV{'HOME'}/.irssi/notifications";
@@ -186,11 +186,14 @@ Irssi::command_bind 'clear_notifications' => sub {
 # Notify even if the highlight came from the active window
 Irssi::settings_add_bool('notification', 'current_window_notification', 'false');
 
+# Notify on every message (even not highlights) on the following wildcard matching windows
+Irssi::settings_add_str('notification', 'always_notify', '');
+
 # Notify on every message (even not highlights) on every window
 Irssi::settings_add_bool('notification', 'always_notify_everything', 'false');
 
-# Notify on every message (even not highlights) on the following wildcard matching windows
-Irssi::settings_add_str('notification', 'always_notify', '');
+# Notify on every message (even not highlights) on the active window
+Irssi::settings_add_bool('notification', 'always_notify_active', 'false');
 
 # Ignore notifications from the wildcard matching windows
 Irssi::settings_add_str('notification', 'ignore_notifications_from', '');
