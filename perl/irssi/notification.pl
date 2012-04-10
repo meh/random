@@ -28,9 +28,9 @@ use vars qw($VERSION %IRSSI);
 $VERSION = '0.1';
 %IRSSI = (
 	author      => 'meh',
-	contact     => 'meh.ffff@gmail.com',
+	contact     => 'meh@paranoici.org',
 	name        => 'notification',
-	description => 'Alert when you receive a query or highlight message.',
+	description => 'Persistent notification script.',
 	license     => 'AGPLv3',
 );
 
@@ -85,7 +85,9 @@ sub notify {
 			return 0;
 		}
 
-		system(Irssi::settings_get_str('command_on_notification'));
+		if (my $command = Irssi::settings_get_str('command_on_notification')) {
+			`$command 2>&1 &`;
+		}
 
 		open my $FILE, '>>', "$ENV{'HOME'}/.irssi/notifications";
 		print $FILE "$name:$server, ";
@@ -196,7 +198,7 @@ Irssi::settings_add_str('notification', 'ignore_notifications_from', '');
 # Notify only the wildcard matching windows
 Irssi::settings_add_str('notification', 'notify_only', '');
 
-# Execute this command on notification
+# Execute this command on notification, the command line is appended with `2>&1 &`
 Irssi::settings_add_str('notification', 'command_on_notification', '');
 
 # Windows syntax is name@server so a wildcard like *@server matches every message from that server
