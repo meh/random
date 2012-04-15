@@ -34,6 +34,30 @@ $VERSION = '0.1';
 	license     => 'AGPLv3',
 );
 
+# Notify even if the highlight came from the active window
+Irssi::settings_add_bool('notification', 'current_window_notification', 'false');
+
+# Notify on every message (even not highlights) on the following wildcard matching windows
+Irssi::settings_add_str('notification', 'always_notify', '');
+
+# Notify on every message (even not highlights) on every window
+Irssi::settings_add_bool('notification', 'always_notify_everything', 'false');
+
+# Notify on every message (even not highlights) on the active window
+Irssi::settings_add_bool('notification', 'always_notify_current_window', 'false');
+
+# Ignore notifications from the wildcard matching windows
+Irssi::settings_add_str('notification', 'ignore_notifications_from', '');
+
+# Notify only the wildcard matching windows
+Irssi::settings_add_str('notification', 'notify_only', '');
+
+# Execute this command on notification, the command line is appended with `2>&1 &`
+Irssi::settings_add_str('notification', 'command_on_notification', '');
+
+# Windows syntax is name@server so a wildcard like *@server matches every message from that server
+# or nick@* matches that nick everywhere.
+
 unlink "$ENV{'HOME'}/.irssi/notifications";
 
 sub wildcard {
@@ -191,27 +215,3 @@ Irssi::signal_add 'gui exit' => sub {
 Irssi::command_bind 'clear_notifications' => sub {
 	unlink("$ENV{'HOME'}/.irssi/notifications");
 };
-
-# Notify even if the highlight came from the active window
-Irssi::settings_add_bool('notification', 'current_window_notification', 'false');
-
-# Notify on every message (even not highlights) on the following wildcard matching windows
-Irssi::settings_add_str('notification', 'always_notify', '');
-
-# Notify on every message (even not highlights) on every window
-Irssi::settings_add_bool('notification', 'always_notify_everything', 'false');
-
-# Notify on every message (even not highlights) on the active window
-Irssi::settings_add_bool('notification', 'always_notify_current_window', 'false');
-
-# Ignore notifications from the wildcard matching windows
-Irssi::settings_add_str('notification', 'ignore_notifications_from', '');
-
-# Notify only the wildcard matching windows
-Irssi::settings_add_str('notification', 'notify_only', '');
-
-# Execute this command on notification, the command line is appended with `2>&1 &`
-Irssi::settings_add_str('notification', 'command_on_notification', '');
-
-# Windows syntax is name@server so a wildcard like *@server matches every message from that server
-# or nick@* matches that nick everywhere.
