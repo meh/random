@@ -1,4 +1,4 @@
-# Perl script to auto leave certain channels
+# Automatically leave certain channels, useful for autojoins and such.
 
 use Irssi;
 use Irssi::TextUI;
@@ -6,34 +6,39 @@ use vars qw($VERSION %IRSSI);
 
 $VERSION = '0.1';
 %IRSSI = (
-    author      => 'meh',
-    contact     => 'meh@paranoici.org',
-    name        => 'autoleave',
-    description => 'Autoleave certain channels.',
-    license     => 'AGPLv3',
+	author      => 'meh',
+	contact     => 'meh@paranoici.org',
+	name        => 'autoleave',
+	description => 'Autoleave certain channels.',
+	license     => 'AGPLv3',
 );
 
-sub leave {
-    $channel = shift;
+# space separated list of channel@server
+Irssi::settings_add_str('autoleave', 'autoleave_channels', '');
 
-    for my $chan (split /\s+/, Irssi::settings_get_str('autoleave_channels')) {
-        my ($name, $server) = split /@/, $chan;
+# message to leave with
+Irssi::settings_add_str('autoleave', 'autoleave_message', 'leaving');
 
-        if ($channel->{name} eq $name and (not $server or $channel->{server}->{chatnet} eq $server)) {
-            return 1;
-        }
-    }
+sub has_to_leave {
+	my $channel = shift;
 
-    return 0;
+	for my $current (split /\s+/, Irssi::settings_get_str('autoleave_channels')) {
+		my ($name, $server) = split /@/, $current;
+
+		if ($channel->{name} eq $name and (not $server or $channel->{server}->{tag} eq $server)) {
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 Irssi::signal_add 'channel joined' => sub {
-    $joined = shift || return 0;
+	my $joined = shift || return 0;
 
-    if (leave($joined)) {
-        $joined->{server}->send_raw("PART $joined->{name} :" . Irssi::settings_get_str('autoleave_message'));
-    }
+	if (has_to_leave($joined)) {
+		$joined->{server}->send_raw("PART $joined->{name} :" . Irssi::settings_get_str('autoleave_message'));
+	}
 };
 
-Irssi::settings_add_str('autoleave', 'autoleave_channels', '');
-Irssi::settings_add_str('autoleave', 'autoleave_message', 'leaving');
+

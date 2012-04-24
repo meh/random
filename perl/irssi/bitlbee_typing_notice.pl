@@ -21,26 +21,13 @@ $VERSION = '0.1';
 );
 
 # send the typing notice to the current buddy
-Irssi::settings_add_bool('bitlbee_typing', 'send_typing_notice', 'true');
-
-# the tags of the bitlbee servers
-Irssi::settings_add_str('bitlbee', 'bitlbee_tags', 'localhost');
+Irssi::settings_add_bool('bitlbee', 'send_typing_notice', 'true');
 
 use constant NOT_TYPING => 0;
 use constant TYPING     => 1;
 use constant THINKING   => 2;
 
 my %typing;
-
-sub can_notice {
-	my $tag = shift;
-
-	for my $match (split /\s+/, Irssi::settings_get_str('bitlbee_tags')) {
-		return 1 if $match eq $tag;
-	}
-
-	return 0;
-}
 
 sub redraw {
 	my ($from)  = @_;
@@ -71,7 +58,7 @@ sub typing {
 Irssi::signal_add 'ctcp msg' => sub {
 	my ($server, $msg, $from, $address) = @_;
 
-	return unless can_notice($server->{tag});
+	return unless $server->isupport('NETWORK') eq 'BitlBee';
 
 	if (my($type) = $msg =~ /TYPING ([0-9])/) {
 		Irssi::signal_stop();
@@ -92,7 +79,7 @@ Irssi::signal_add_last 'gui key pressed' => sub {
 		my $window = Irssi::active_win();
 		my $nick   = $window->get_active_name();
 
-		return unless can_notice($server->{tag});
+		return unless $server->isupport('NETWORK') eq 'BitlBee';
 
 		my $input    = Irssi::parse_special('$L');
 		my $cmdchars = Irssi::settings_get_str('cmdchars');
@@ -112,7 +99,7 @@ Irssi::signal_add_last 'window changed' => sub {
 Irssi::signal_add 'message private' => sub {
 	my ($server, $data, $from, $address, $target) = @_;
 
-	return unless can_notice($server->{tag});
+	return unless $server->isupport('NETWORK') eq 'BitlBee';
 
 	typing($from, NOT_TYPING, 1);
 	typing(Irssi::active_win()->get_active_name(), NOT_TYPING);
@@ -121,7 +108,7 @@ Irssi::signal_add 'message private' => sub {
 Irssi::signal_add 'message quit' => sub {
 	my ($server, $nick) = @_;
 
-	return unless can_notice($server->{tag});
+	return unless $server->isupport('NETWORK') eq 'BitlBee';
 
 	typing($nick, NOT_TYPING);
 };
