@@ -119,9 +119,9 @@ sub typing_notice {
 	my $channel                = $window->get_active_name();
 
 	if (exists($typing{$channel})) {
-		my $append = $typing{$channel} == 2 ? ' (stale)' : '';
+		my $mode = $typing{$channel} == 2 ? 'thinking' : 'typing';
 
-		$item->default_handler($get_size_only, "{sb typing$append}", 0, 1);
+		$item->default_handler($get_size_only, "{sb $mode}", 0, 1);
 	}
 	else {
 		$item->default_handler($get_size_only, '', 0, 1);
