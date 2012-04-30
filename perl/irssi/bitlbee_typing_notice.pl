@@ -98,7 +98,7 @@ Irssi::signal_add_first 'server event' => sub {
 	my ($number, $nick) = $data =~ m/^(\d+) .*? (.*?) /;
 
 	if ($querying->{$nick}) {
-		Irssi::signal_stop() if $number == 301 || $number == 311 || $number == 312 || $number == 317 || $number == 318;
+		Irssi::signal_stop() if $number == 301 || $number == 311 || $number == 312 || $number == 317 || $number == 318 || $number == 320;
 
 		if ($number == 312) {
 			if ($data =~ m/:(.*?) /) {
