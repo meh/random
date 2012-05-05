@@ -103,12 +103,14 @@ Irssi::signal_add_first 'server event' => sub {
 		if ($number == 312) {
 			if ($data =~ m/:(.*?) /) {
 				my $protocol = $1;
-				my $address  = $server->query_find($nick)->{address};
+				my $query    = $server->query_find($nick);
+				
+				if (ref $query && (my $address = $query->{address})) {
+					$protocols->{$address} = $protocol;
 
-				$protocols->{$address} = $protocol;
-
-				if (TIMEOUT->{$protocol}) {
-					$timeouts->{$nick} = Irssi::timeout_add_once(TIMEOUT->{$protocol} * 1000, 'typing', $nick);
+					if (TIMEOUT->{$protocol}) {
+						$timeouts->{$nick} = Irssi::timeout_add_once(TIMEOUT->{$protocol} * 1000, 'typing', $nick);
+					}
 				}
 			}
 		}
