@@ -68,7 +68,7 @@ Irssi::signal_add 'ctcp msg' => sub {
 	return unless $server->isupport('NETWORK') eq 'BitlBee';
 
 	if (my ($type) = $msg =~ /TYPING ([0-9])/) {
-		unless ($protocols->{$address}) {
+		unless ($querying->{$from} || defined $protocols->{$address}) {
 			$querying->{$from} = 1;
 
 			$server->command("whois $from");
@@ -116,6 +116,8 @@ Irssi::signal_add_first 'server event' => sub {
 		}
 
 		if ($number == 318) {
+			$protocols->{$address} = 0;
+
 			delete $querying->{$nick};
 		}
 	}
