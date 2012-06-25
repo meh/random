@@ -22,7 +22,6 @@
 # I suggest using http://github.com/meh/random/blob/master/c/X/vbell.c with command_on_notification
 
 use Irssi;
-use Irssi::TextUI;
 use vars qw($VERSION %IRSSI);
 
 $VERSION = '0.1';
@@ -52,6 +51,9 @@ Irssi::settings_add_str('notification', 'ignore_notifications_from', '');
 # Notify only the wildcard matching windows
 Irssi::settings_add_str('notification', 'notify_only', '');
 
+# Notify on connection of the following wildcard matching nick@server
+Irssi::settings_add_str('notification', 'notify_connection_of', '');
+
 # Execute this command on notification, the command line is appended with `2>&1 &`
 Irssi::settings_add_str('notification', 'command_on_notification', '');
 
@@ -59,6 +61,8 @@ Irssi::settings_add_str('notification', 'command_on_notification', '');
 # or nick@* matches that nick everywhere.
 
 unlink "$ENV{'HOME'}/.irssi/notifications";
+
+my %notify_connection_of;
 
 sub wildcard {
 	my $value = shift;
@@ -162,6 +166,7 @@ Irssi::signal_add 'message public' => sub {
 
 	if (Irssi::settings_get_bool('always_notify_everything')) {
 		notify($target, $server->{tag});
+
 		return;
 	}
 
@@ -173,6 +178,7 @@ Irssi::signal_add 'message public' => sub {
 		}
 
 		notify($target, $server->{tag});
+
 		return;
 	}
 
@@ -180,8 +186,28 @@ Irssi::signal_add 'message public' => sub {
 		for my $expression (split /\s*[:,]\s*/, Irssi::settings_get_str('always_notify')) {
 			if (eval { ($target.'@'.$server->{tag}) =~ /$expression/; }) {
 				notify($target, $server->{tag});
+
 				return;
 			}
+		}
+	}
+};
+
+Irssi::signal_add_first 'message join' => sub {
+	my ($server, $channel, $nick, $address) = @_;
+
+	if ($notify_connection_of{$nick.'@'.$server->{tag}}) {
+		notify($channel, $server->{tag});
+		delete $notify_connection_of{$nick.'@'.$server->{tag}};
+
+		return;
+	}
+
+	for my $expression (split /\s*[:,]\s*/, Irssi::settings_get_str('notify_connection_of')) {
+		if (eval { ($nick.'@'.$server->{tag}) =~ /$expression/; }) {
+			notify($channel, $server->{tag});
+
+			return;
 		}
 	}
 };
@@ -214,4 +240,10 @@ Irssi::signal_add 'gui exit' => sub {
 
 Irssi::command_bind 'clear_notifications' => sub {
 	unlink("$ENV{'HOME'}/.irssi/notifications");
+};
+
+Irssi::command_bind 'notify_connection' => sub {
+	my $match = shift;
+
+	$notify_connection_of{$match} = 1;
 };
