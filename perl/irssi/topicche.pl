@@ -12,7 +12,7 @@ use Irssi;
 use Irssi::TextUI;
 use vars qw($VERSION %IRSSI);
 
-$VERSION = '0.1';
+$VERSION = '0.2';
 %IRSSI = (
 	author      => 'meh',
 	contact     => 'meh@paranoici.org',
@@ -66,9 +66,20 @@ sub topic {
 	}
 }
 
-my $current = 0;
-my $spacing = -1;
-my $wait    = Irssi::settings_get_int('topicche_wait');
+my $current;
+my $spacing,
+my $wait;
+
+sub restart {
+	my $wait_too = shift;
+
+	$current = 0;
+	$spacing = -1;
+
+	if ($wait_too) {
+		$wait = Irssi::settings_get_int('topicche_wait');
+	}
+}
 
 sub show {
 	my ($item, $get_size_only) = @_;
@@ -100,8 +111,7 @@ sub show {
 		$spacing--;
 
 		if ($spacing <= 0) {
-			$current = 0;
-			$spacing = -1;
+			restart();
 		}
 	}
 	elsif (length($text) < $width / 2) {
@@ -122,11 +132,19 @@ sub redraw {
 }
 
 Irssi::signal_add 'window changed' => sub {
+	restart(1);
 	redraw();
+};
 
-	$current = 0;
-	$spacing = -1;
-	$wait    = Irssi::settings_get_int('topicche_wait');
+Irssi::signal_add 'channel topic changed' => sub {
+	my ($channel) = @_;
+
+	my $active = Irssi::active_win()->{active};
+
+	if ($active->{name} eq $channel->{name} && $active->{server}->{tag} eq $channel->{server}->{tag}) {
+		restart(1);
+		redraw();
+	}
 };
 
 my $timeout;
