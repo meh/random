@@ -140,5 +140,3 @@ Irssi::signal_add 'setup changed' => sub {
 };
 
 $timeout = Irssi::timeout_add(Irssi::settings_get_int('topicche_refresh'), 'redraw', undef);
-
-print Irssi::parse_special('$J');
