@@ -71,14 +71,14 @@ my $spacing,
 my $wait;
 
 sub restart {
-	my $wait_too = shift;
-
 	$current = 0;
 	$spacing = -1;
+}
 
-	if ($wait_too) {
-		$wait = Irssi::settings_get_int('topicche_wait');
-	}
+sub restart_and_wait {
+	restart();
+
+	$wait = Irssi::settings_get_int('topicche_wait');
 }
 
 sub show {
@@ -132,7 +132,7 @@ sub redraw {
 }
 
 Irssi::signal_add 'window changed' => sub {
-	restart(1);
+	restart_and_wait();
 	redraw();
 };
 
@@ -142,7 +142,7 @@ Irssi::signal_add 'channel topic changed' => sub {
 	my $active = Irssi::active_win()->{active};
 
 	if ($active->{name} eq $channel->{name} && $active->{server}->{tag} eq $channel->{server}->{tag}) {
-		restart(1);
+		restart_and_wait();
 		redraw();
 	}
 };
