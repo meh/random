@@ -1,8 +1,8 @@
 #! /usr/bin/env ruby
 require 'net/http'
 
-link = if matches = ARGV.first.match(%r{fakku.*/manga/(.*?)/?})
-	"http://www.fakku.net/manga/#{matches[1]}/read"
+link = if matches = ARGV.first.match(%r{fakku.*/(manga|doujinshi)/(.+?)(/|$)})
+	"http://www.fakku.net/#{matches[1]}/#{matches[2]}/read"
 else
 	"http://www.fakku.net/manga/#{ARGV.first}/read"
 end
