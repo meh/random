@@ -31,6 +31,7 @@ sub escape {
 	my $text = shift;
 
 	$text =~ s/%/%%/g;
+	$text =~ s/\\/\\\\/g;
 
 	return $text;
 }
@@ -94,7 +95,7 @@ sub show {
 	my $width = $item->{size} - 1;
 
 	if ($wait > 0 || length($topic) <= $width) {
-		$item->default_handler(0, ' ' . escape($topic), undef, 1);
+		$item->default_handler(0, ' ' . escape($topic), undef);
 		$wait--;
 
 		return;
@@ -122,7 +123,7 @@ sub show {
 		$current++;
 	}
 
-	$item->default_handler(0, ' ' . escape($text), undef, 1);
+	$item->default_handler(0, ' ' . escape($text), undef);
 }
 
 Irssi::statusbar_item_register('topicche', '$0', 'show');
