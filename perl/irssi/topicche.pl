@@ -35,6 +35,7 @@ sub escape {
 
 	$text =~ s/%/%%/g;
 	$text =~ s/\\/\\\\/g;
+	$text =~ s/\$/\$\$/g;
 
 	return $text;
 }
