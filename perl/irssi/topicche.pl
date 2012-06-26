@@ -12,7 +12,7 @@ use Irssi;
 use Irssi::TextUI;
 use vars qw($VERSION %IRSSI);
 
-$VERSION = '0.2';
+$VERSION = '0.3';
 %IRSSI = (
 	author      => 'meh',
 	contact     => 'meh@paranoici.org',
@@ -26,6 +26,9 @@ Irssi::settings_add_int('topicche', 'topicche_refresh', 150);
 
 # the default ticks waiting before starting the rotation
 Irssi::settings_add_int('topicche', 'topicche_wait', 10);
+
+# set the theme formatters at the beginning of the topic
+Irssi::settings_add_str('topicche', 'topicche_theme', '');
 
 sub escape {
 	my $text = shift;
@@ -95,7 +98,7 @@ sub show {
 	my $width = $item->{size} - 1;
 
 	if ($wait > 0 || length($topic) <= $width) {
-		$item->default_handler(0, ' ' . escape($topic), undef);
+		$item->default_handler(0, ' ' . Irssi::settings_get_str('topicche_theme') . escape($topic), undef);
 		$wait--;
 
 		return;
@@ -123,7 +126,7 @@ sub show {
 		$current++;
 	}
 
-	$item->default_handler(0, ' ' . escape($text), undef);
+	$item->default_handler(0, ' ' . Irssi::settings_get_str('topicche_theme') . escape($text), undef);
 }
 
 Irssi::statusbar_item_register('topicche', '$0', 'show');
