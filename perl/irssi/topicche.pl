@@ -28,8 +28,7 @@ Irssi::settings_add_int('topicche', 'topicche_refresh', 150);
 Irssi::settings_add_int('topicche', 'topicche_wait', 10);
 
 # set the theme formatters at the beginning of the topic
-Irssi::settings_add_str('topicche', 'topicchestart', '');
-Irssi::settings_add_str('topicche', 'topiccheend', '');
+Irssi::settings_add_str('topicche', 'topicche_theme', '');
 
 sub escape {
 	my $text = shift;
@@ -101,7 +100,7 @@ sub show {
 	my $width = $item->{size} - 1;
 
 	if ($wait > 0 || length($topic) <= $width) {
-		$item->default_handler(0, ' ' . Irssi::settings_get_str('topicchestart') . escape($topic) . Irssi::settings_get_str('topiccheend'), undef);
+		$item->default_handler(0, ' ' . Irssi::settings_get_str('topicche_theme') . escape($topic), undef);
 		$wait--;
 
 		return;
@@ -129,7 +128,7 @@ sub show {
 		$current++;
 	}
 
-	$item->default_handler(0, ' ' . Irssi::settings_get_str('topicchestart') . escape($topic) . Irssi::settings_get_str('topiccheend'), undef);
+	$item->default_handler(0, ' ' . Irssi::settings_get_str('topicche_theme') . escape($text), undef);
 }
 
 Irssi::statusbar_item_register('topicche', '$0', 'show');
