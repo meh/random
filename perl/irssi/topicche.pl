@@ -90,7 +90,7 @@ sub restart_and_wait {
 sub show {
 	my ($item, $get_size_only) = @_;
 
-	$item->default_handler(1, ' ' x 1024, undef, 1);
+	$item->default_handler(1, ' ' x 1024, undef);
 
 	if ($get_size_only) {
 		return;
