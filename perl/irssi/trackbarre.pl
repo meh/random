@@ -17,20 +17,39 @@ $VERSION = '0.1';
 Irssi::settings_add_bool('trackbarre', 'trackbarre_always', 'false');
 
 # the char to use to draw the line
-Irssi::settings_add_str('trackbarre', 'trackbarre_char', '-');
+Irssi::settings_add_str('trackbarre', 'trackbarre_separator', '-');
 
 # the format string for the line
 Irssi::settings_add_str('trackbarre', 'trackbarre_theme', '%K');
 
+sub escape {
+	my $text = shift;
+
+	$text =~ s/%/%%/g;
+	$text =~ s/\\/\\\\/g;
+	$text =~ s/\$/\$\$/g;
+	$text =~ s/\{/%{/g;
+
+	return $text;
+}
+
 sub mark {
 	my $window = shift;
+	my $width  = $window->{width};
 	my $line   = $window->view->get_bookmark('trackbarre');
 
 	if ($line) {
 		$window->view->remove_line($line);
 	}
 
-	$window->print(Irssi::settings_get_str('trackbarre_theme') . decode_utf8(Irssi::settings_get_str('trackbarre_char')) x $window->{width}, MSGLEVEL_NEVER);
+	$line = decode_utf8(Irssi::settings_get_str('trackbarre_separator'));
+	$line = $line x int($width / length($line));
+
+	if (length($line) < $width) {
+		$line = ' ' x (($width - length($line)) / 2) . $line;
+	}
+
+	$window->print(Irssi::settings_get_str('trackbarre_theme') . escape($line), MSGLEVEL_NEVER);
 	$window->view->set_bookmark_bottom('trackbarre');
 }
 
