@@ -51,7 +51,7 @@ Irssi::signal_add 'window changed' => sub {
 	}
 
 	if ($current && !Irssi::settings_get_bool('trackbarre_always')) {
-		unmark_if_needed($current) if $current;
+		unmark_if_needed($current);
 	}
 };
 
