@@ -84,11 +84,15 @@ Irssi::signal_add 'window changed' => sub {
 };
 
 Irssi::command_bind 'mark' => sub {
-	mark(Irssi::active_win());
-	Irssi::command('redraw');
+	if (my $window = Irssi::active_win()) {
+		mark($window);
+		$window->view->redraw();
+	}
 };
 
 Irssi::command_bind 'unmark' => sub {
-	unmark(Irssi::active_win());
-	Irssi::command('redraw');
+	if (my $window = Irssi::active_win()) {
+		unmark($window);
+		$window->view->redraw();
+	}
 }
