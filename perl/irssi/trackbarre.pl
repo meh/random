@@ -4,7 +4,7 @@ use Irssi;
 use Irssi::TextUI;
 use vars qw($VERSION %IRSSI);
 
-$VERSION = '0.1';
+$VERSION = '0.2';
 %IRSSI = (
 	author      => 'meh',
 	contact     => 'meh@paranoici.org',
@@ -53,12 +53,21 @@ sub mark {
 	$window->view->set_bookmark_bottom('trackbarre');
 }
 
-sub unmark_if_needed {
+sub unmark {
 	my $window = shift;
 	my $line   = $window->view->get_bookmark('trackbarre');
 
 	if ($line && $line->{info}->{time} == $window->view->{buffer}->{cur_line}->{info}->{time}) {
 		$window->view->remove_line($line);
+	}
+}
+
+sub unmark_if_needed {
+	my $window = shift;
+	my $line   = $window->view->get_bookmark('trackbarre');
+
+	if ($line && $line->{info}->{time} == $window->view->{buffer}->{cur_line}->{info}->{time}) {
+		unmark($window);
 	}
 }
 
@@ -78,3 +87,8 @@ Irssi::command_bind 'mark' => sub {
 	mark(Irssi::active_win());
 	Irssi::command('redraw');
 };
+
+Irssi::command_bind 'unmark' => sub {
+	unmark(Irssi::active_win());
+	Irssi::command('redraw');
+}
