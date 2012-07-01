@@ -57,7 +57,7 @@ sub unmark {
 	my $window = shift;
 	my $line   = $window->view->get_bookmark('trackbarre');
 
-	if ($line && $line->{info}->{time} == $window->view->{buffer}->{cur_line}->{info}->{time}) {
+	if ($line) {
 		$window->view->remove_line($line);
 	}
 }
