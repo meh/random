@@ -11,6 +11,7 @@
 
 require 'optparse'
 require 'mechanize'
+require 'ripl'
 
 options = {}
 
@@ -51,8 +52,10 @@ puts "Matching with #{options[:regexes].join('; ')}"
 $agent = Mechanize.new
 
 def fetch (page, options)
-	page.links.uniq.each {|link|
-		next unless link.href
+	page.links.select { |l| l.href }.uniq(&:href).each {|link|
+		if link.href.start_with? '//'
+			link.href[0, 2] = "#{page.uri.scheme}://"
+		end
 
 		if options[:recursive].any? { |re| link.href.match(re) }
 			fetch(link.click, options)
@@ -60,7 +63,9 @@ def fetch (page, options)
 
 		next unless options[:regexes].any? { |re| link.href.match(re) }
 
-		file = $agent.head(link.href).filename
+		unless file = $agent.head(link.href).filename rescue nil
+			file = File.basename(link.href.sub(/\?.*$/, ''))
+		end
 
 		if File.exist?(file)
 			puts "File #{file} already exists"
@@ -71,7 +76,9 @@ def fetch (page, options)
 		puts "Downloading #{link.href} as #{file}"
 
 		File.open(file, 'w') {|f|
-			f.write(link.click.content)
+			link.click.content.tap {|c|
+				f.write(c.respond_to?(:read) ? c.read : c.to_str)
+			}
 		}
 	}
 end
