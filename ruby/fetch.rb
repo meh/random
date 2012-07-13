@@ -3,8 +3,6 @@
 #           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
 #                   Version 2, December 2004
 #
-# Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]
-#
 #           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
 #  TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 #
@@ -50,17 +48,19 @@ end
 
 puts "Matching with #{options[:regexes].join('; ')}"
 
-agent = Mechanize.new
+$agent = Mechanize.new
 
 def fetch (page, options)
 	page.links.uniq.each {|link|
+		next unless link.href
+
 		if options[:recursive].any? { |re| link.href.match(re) }
 			fetch(link.click, options)
 		end
 
 		next unless options[:regexes].any? { |re| link.href.match(re) }
 
-		file = File.basename(link.href.sub(/\?.*$/, ''))
+		file = $agent.head(link.href).filename
 
 		if File.exist?(file)
 			puts "File #{file} already exists"
@@ -68,7 +68,7 @@ def fetch (page, options)
 			next
 		end
 
-		puts "Downloading #{link.href}"
+		puts "Downloading #{link.href} as #{file}"
 
 		File.open(file, 'w') {|f|
 			f.write(link.click.content)
@@ -77,5 +77,5 @@ def fetch (page, options)
 end
 
 options[:urls].each {|url|
-	fetch(agent.get(url), options)
+	fetch($agent.get(url), options)
 }
