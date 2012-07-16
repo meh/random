@@ -9,6 +9,7 @@
 use Encode;
 
 use Irssi;
+use Irssi::UI;
 use Irssi::TextUI;
 use vars qw($VERSION %IRSSI);
 
@@ -42,19 +43,6 @@ sub escape {
 	$text =~ s/\{/%{/g;
 
 	return $text;
-}
-
-sub format_length {
-	my $format = shift;
-	my $theme  = shift;
-	my $result = $theme ?
-		Irssi::UI::Theme::format_expand($theme, $format) :
-		Irssi::current_theme->format_expand($format);
-
-	$result =~ s/%[^%]//g;
-	$result =~ s/%[^%{]\{[^}]*\}//g;
-
-	return length($result);
 }
 
 sub topic {
@@ -113,23 +101,13 @@ sub show {
 	}
 
 	my $topic = decode_utf8(topic());
-	my $width = $item->{size} - format_length(Irssi::settings_get_str('topicche_format'));
+	my $width = $item->{size} - Irssi::format_get_length(Irssi::settings_get_str('topicche_format'));
 
-	if (length($topic) <= $width) {
-		if ($current > 0) {
-			return;
-		}
-
+	if ($wait > 0 || length($topic) <= $width) {
 		if (Irssi::settings_get_bool('topicche_center')) {
 			$topic = ' ' x (($width / 2) - (length($topic) / 2)) . $topic;
 		}
 
-		$item->default_handler(0, Irssi::settings_get_str('topicche_format') . escape($topic), undef);
-		$current++;
-
-		return;
-	}
-	elsif ($wait > 0) {
 		$item->default_handler(0, Irssi::settings_get_str('topicche_format') . escape($topic), undef);
 		$wait--;
 
