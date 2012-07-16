@@ -12,7 +12,7 @@ use Irssi;
 use Irssi::TextUI;
 use vars qw($VERSION %IRSSI);
 
-$VERSION = '0.3';
+$VERSION = '0.4';
 %IRSSI = (
 	author      => 'meh',
 	contact     => 'meh@paranoici.org',
@@ -28,7 +28,10 @@ Irssi::settings_add_int('topicche', 'topicche_refresh', 150);
 Irssi::settings_add_int('topicche', 'topicche_wait', 10);
 
 # set the theme formatters at the beginning of the topic
-Irssi::settings_add_str('topicche', 'topicche_theme', '');
+Irssi::settings_add_str('topicche', 'topicche_format', '');
+
+# center the topic when it fits
+Irssi::settings_add_bool('topicche', 'topicche_center', 0);
 
 sub escape {
 	my $text = shift;
@@ -97,10 +100,24 @@ sub show {
 	}
 
 	my $topic = decode_utf8(topic());
-	my $width = $item->{size} - 1;
+	my $width = $item->{size} - length(Irssi::current_theme->format_expand(Irssi::settings_get_str('topicche_format')));
 
-	if ($wait > 0 || length($topic) <= $width) {
-		$item->default_handler(0, ' ' . Irssi::settings_get_str('topicche_theme') . escape($topic), undef);
+	if (length($topic) <= $width) {
+		if ($current > 0) {
+			return;
+		}
+
+		if (Irssi::settings_get_bool('topicche_center')) {
+			$topic = ' ' x (($width / 2) - (length($topic) / 2) + 3) . $topic;
+		}
+
+		$item->default_handler(0, Irssi::settings_get_str('topicche_format') . escape($topic), undef);
+		$current++;
+
+		return;
+	}
+	elsif ($wait > 0) {
+		$item->default_handler(0, Irssi::settings_get_str('topicche_format') . escape($topic), undef);
 		$wait--;
 
 		return;
@@ -128,7 +145,7 @@ sub show {
 		$current++;
 	}
 
-	$item->default_handler(0, ' ' . Irssi::settings_get_str('topicche_theme') . escape($text), undef);
+	$item->default_handler(0, Irssi::settings_get_str('topicche_format') . escape($text), undef);
 }
 
 Irssi::statusbar_item_register('topicche', '$0', 'show');
