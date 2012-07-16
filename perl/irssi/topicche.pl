@@ -44,6 +44,19 @@ sub escape {
 	return $text;
 }
 
+sub format_length {
+	my $format = shift;
+	my $theme  = shift;
+	my $result = $theme ?
+		Irssi::UI::Theme::format_expand($theme, $format) :
+		Irssi::current_theme->format_expand($format);
+
+	$result =~ s/%[^%]//g;
+	$result =~ s/%[^%{]\{[^}]*\}//g;
+
+	return length($result);
+}
+
 sub topic {
 	my $window = Irssi::active_win()->{active};
 	my $server = $window->{server};
@@ -100,7 +113,7 @@ sub show {
 	}
 
 	my $topic = decode_utf8(topic());
-	my $width = $item->{size} - length(Irssi::current_theme->format_expand(Irssi::settings_get_str('topicche_format')));
+	my $width = $item->{size} - format_length(Irssi::settings_get_str('topicche_format'));
 
 	if (length($topic) <= $width) {
 		if ($current > 0) {
@@ -108,7 +121,7 @@ sub show {
 		}
 
 		if (Irssi::settings_get_bool('topicche_center')) {
-			$topic = ' ' x (($width / 2) - (length($topic) / 2) + 3) . $topic;
+			$topic = ' ' x (($width / 2) - (length($topic) / 2)) . $topic;
 		}
 
 		$item->default_handler(0, Irssi::settings_get_str('topicche_format') . escape($topic), undef);
