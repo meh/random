@@ -3,7 +3,7 @@
 // @version     0.0.1
 // @namespace   http://meh.paranoid.pk
 // @description Turn plain text URLs into links.
-// @updateURL   http
+// @updateURL   https://raw.github.com/meh/random/master/js/linkazza.user.js
 // @include     *
 // ==/UserScript==
 
