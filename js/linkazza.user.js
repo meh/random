@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        linkazza
-// @version     0.0.1
+// @version     0.0.2
 // @namespace   http://meh.paranoid.pk
 // @description Turn plain text URLs into links.
 // @updateURL   https://raw.github.com/meh/random/master/js/linkazza.user.js
@@ -8,15 +8,15 @@
 // ==/UserScript==
 
 var exclude = [
-  'a', 'head', 'noscript', 'option', 'script', 'style', 'title', 'textarea'
+	'a', 'head', 'noscript', 'option', 'script', 'style', 'title', 'textarea'
 ];
 
 var xpath =
-  './/text()[not(ancestor::' + exclude.join(') and not(ancestor::') + ')]';
+	'.//text()[not(ancestor::' + exclude.join(') and not(ancestor::') + ')]';
 
 var regexes = [
-  /\b([a-z][-a-z9-9+.]+:\/\/|www\.)[^\s'"<>()]+/gi,
-  /\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}\b/gi,
+	/\b([a-z][-a-z9-9+.]+:\/\/|www\.)[^\s'"<>()]+/gi,
+	/\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}\b/gi,
 ]
 
 var observer = new (this.MutationObserver || this.MozMutationObserver || this.WebKitMutationObserver)(function (mutations) {
@@ -32,96 +32,96 @@ var observer = new (this.MutationObserver || this.MozMutationObserver || this.We
 	});
 });
 
-observer.observe(document.body, { childList: true, characterData: true });
+observer.observe(document.body, { childList: true, characterData: true, subtree: true });
 defer(linkazza, document.body);
 
 function linkazza (node) {
-  if (node.nodeType == Node.ELEMENT_NODE) {
-    var i = 0;
-    var result = document.evaluate(xpath, node, null,
-      XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+	if (node.nodeType == Node.ELEMENT_NODE) {
+		var i = 0;
+		var result = document.evaluate(xpath, node, null,
+			XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 
-    defer(interleave, function () {
-      if (i >= result.snapshotLength) {
-        return false;
-      }
+		defer(interleave, function () {
+			if (i >= result.snapshotLength) {
+				return false;
+			}
 
-      linkazza(result.snapshotItem(i++));
-    });
+			linkazza(result.snapshotItem(i++));
+		});
 
-    return;
-  }
+		return;
+	}
 
-  if (!node.textContent) {
-    return;
-  }
+	if (!node.textContent) {
+		return;
+	}
 
-  var container;
-  var text     = node.textContent;
-  var position = 0;
+	var container;
+	var text     = node.textContent;
+	var position = 0;
 
-  for (var i = 0, match; i < regexes.length; i++) {
-    while (match = regexes[i].exec(text)) {
-      container = container || document.createElement('span');
-      container.appendChild(document.createTextNode(
-        text.substring(position, match.index)));
+	for (var i = 0, match; i < regexes.length; i++) {
+		while (match = regexes[i].exec(text)) {
+			container = container || document.createElement('span');
+			container.appendChild(document.createTextNode(
+				text.substring(position, match.index)));
 
-      var link = match[0].replace(/\.*$/, '')
-      var a    = document.createElement('a');
+			var link = match[0].replace(/\.*$/, '')
+			var a    = document.createElement('a');
 
-      a.className = 'linkazza';
-      a.appendChild(document.createTextNode(link));
+			a.className = 'linkazza';
+			a.appendChild(document.createTextNode(link));
 
-      if (link.indexOf(':/') < 0) {
-        if (link.indexOf('@') > 0) {
-          a.setAttribute('href', 'mailto:' + link);
-        }
-        else {
-          a.setAttribute('href', 'http://' + link);
-        }
-      }
-      else {
-        a.setAttribute('href', link);
-      }
+			if (link.indexOf(':/') < 0) {
+				if (link.indexOf('@') > 0) {
+					a.setAttribute('href', 'mailto:' + link);
+				}
+				else {
+					a.setAttribute('href', 'http://' + link);
+				}
+			}
+			else {
+				a.setAttribute('href', link);
+			}
 
-      position = match.index + link.length;
+			position = match.index + link.length;
 
-      container.appendChild(a);
-    }
-  }
+			container.appendChild(a);
+		}
+	}
 
-  if (container) {
-    container.appendChild(document.createTextNode(text.substring(position, text.length)));
+	if (container) {
+		container.appendChild(document.createTextNode(text.substring(position, text.length)));
 
-    while (container.firstChild) {
-      node.parentNode.insertBefore(container.firstChild, node)
-    }
+		while (container.firstChild) {
+			node.parentNode.insertBefore(container.firstChild, node)
+		}
 
-    node.parentNode.removeChild(node);
-  }
+		node.parentNode.removeChild(node);
+	}
 }
 
 function interleave (func, times) {
-  times = times || 50;
+	times = times || 50;
 
-  for (var i = 0; i < times; i++) {
-    if (func() === false) {
-      return;
-    }
-  }
+	for (var i = 0; i < times; i++) {
+		if (func() === false) {
+			return;
+		}
+	}
 
-  defer(interleave, func, times);
+	defer(interleave, func, times);
 }
 
 function defer (func) {
-  if (arguments.length > 1) {
-    var rest = Array.prototype.slice.call(arguments, 1);
+	if (arguments.length > 1) {
+		var rest = Array.prototype.slice.call(arguments, 1);
 
-    setTimeout(function () {
-      func.apply(null, rest);
-    }, 0);
-  }
-  else {
-    setTimeout(func, 0);
-  }
+		setTimeout(function () {
+			func.apply(null, rest);
+		}, 0);
+	}
+	else {
+		setTimeout(func, 0);
+	}
 }
