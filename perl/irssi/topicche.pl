@@ -46,21 +46,27 @@ sub escape {
 }
 
 sub topic {
-	my $window = Irssi::active_win()->{active};
-	my $server = $window->{server};
 	my $topic;
+	my $window = Irssi::active_win();
+	
+	if ($window && ($window = $window->{active})) {
+		my $server;
 
-	if ($window->{type} eq 'QUERY') {
-		my $query = $server->query_find($window->{name});
+		if ($server = $window->{server}) {
+			if ($window->{type} eq 'QUERY') {
+				my $query = $server->query_find($window->{name});
 
-		$topic = "$query->{address} ($server->{tag})";
+				$topic = "$query->{address} ($server->{tag})";
+			}
+			elsif ($window->{type} eq 'CHANNEL') {
+				my $channel = $server->channel_find($window->{name});
+
+				$topic = $channel->{topic};
+			}
+		}
 	}
-	elsif ($window->{type} eq 'CHANNEL') {
-		my $channel = $server->channel_find($window->{name});
 
-		$topic = $channel->{topic};
-	}
-	else {
+	unless ($topic) {
 		$topic = 'Irssi v' . Irssi::parse_special('$J') . ' - http://www.irssi.org';
 	}
 
