@@ -19,8 +19,9 @@ Irssi::settings_add_bool('trackbarre', 'trackbarre_always', 'false');
 # the char to use to draw the line
 Irssi::settings_add_str('trackbarre', 'trackbarre_separator', '-');
 
-# the format string for the line
-Irssi::settings_add_str('trackbarre', 'trackbarre_theme', '%K');
+Irssi::theme_register([
+	'trackbarre', '%K$0'
+]);
 
 sub escape {
 	my $text = shift;
@@ -49,7 +50,7 @@ sub mark {
 		$line = ' ' x (($width - length($line)) / 2) . $line;
 	}
 
-	$window->print(Irssi::settings_get_str('trackbarre_theme') . escape($line), MSGLEVEL_NEVER);
+	$window->printformat(MSGLEVEL_NEVER, 'trackbarre', escape($line));
 	$window->view->set_bookmark_bottom('trackbarre');
 }
 
