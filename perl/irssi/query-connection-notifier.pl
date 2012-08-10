@@ -39,3 +39,23 @@ Irssi::signal_add 'message quit' => sub {
 
 	$quit{"$server->{tag}:$nick"} = 1;
 };
+
+Irssi::signal_add 'query created' => sub {
+	my ($query, $automatic) = @_;
+
+	foreach $channel ($query->{server}->channels) {
+		foreach $nick ($channel->nicks) {
+			if ($nick eq $query->{name}) {
+				return;
+			}
+		}
+	}
+
+	$quit{"$query->{server}->{tag}:$query->{name}"} = 1;
+};
+
+Irssi::signal_add 'query destroyed' => sub {
+	my ($query) = @_;
+
+	delete $quit{"$query->{server}->{tag}:$query->{name}"};
+};
