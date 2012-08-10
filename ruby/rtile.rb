@@ -22,6 +22,10 @@ OptionParser.new do |o|
 	o.on '-f', '--focus', 'Use focused window as target' do
 		options[:focus] = true
 	end
+
+	o.on '-a', '--active', 'Use the active window as target' do
+		options[:active] = true
+	end
 end.parse!
 
 Class.new {
@@ -41,13 +45,15 @@ Class.new {
 			@select = @display.select_window(true) if @select
 		elsif @options[:focus]
 			@focus = @display.focused
+		elsif @options[:active]
+			@active = @display.active_window
 		end
 
 		instance_exec @display, &block
 	end
 
 	def window (data, &block)
-		return if @select or @focus
+		return if @select || @focus || @active
 
 		@display.default_screen.windows.each {|window|
 			block.call(window) if matches?(data, window)
@@ -64,6 +70,12 @@ Class.new {
 		return unless @focus
 
 		block.call(@focus)
+	end
+
+	def active (&block)
+		return unless @active
+
+		block.call(@active)
 	end
 
 	def normal (&block)
@@ -95,4 +107,4 @@ Class.new {
 			}
 		}
 	end
-}.new(options[:display], options[:config], select: options[:select], focus: options[:focus])
+}.new(options[:display], options[:config], select: options[:select], focus: options[:focus], active: options[:active])
