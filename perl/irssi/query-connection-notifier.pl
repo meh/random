@@ -25,7 +25,7 @@ Irssi::signal_add 'message join' => sub {
 		delete $quit{"$server->{tag}:$nick"};
 
 		foreach $query (Irssi::queries()) {
-			if ($query->{server_tag} eq $server->{tag}) {
+			if ($query->{server_tag} eq $server->{tag} && $query->{name} eq $nick) {
 				$query->printformat(MSGLEVEL_JOINS, 'connect', $nick, $address);
 
 				break;
