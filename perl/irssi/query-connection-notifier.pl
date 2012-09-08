@@ -59,3 +59,9 @@ Irssi::signal_add 'query destroyed' => sub {
 
 	delete $quit{"$query->{server}->{tag}:$query->{name}"};
 };
+
+Irssi::signal_add 'message private' => sub {
+	my ($server, $msg, $nick, $address) = @_;
+
+	delete $quit{"$server->{tag}:$nick"};
+};
