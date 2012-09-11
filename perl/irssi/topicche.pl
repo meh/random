@@ -1,5 +1,6 @@
 # INSTALLATION
 # ------------
+# You need to install Text::CharWidth either from CPAN or your package manager.
 #
 #   /sbar topic remove topic
 #   /sbar topic remove topic_empty
@@ -7,6 +8,7 @@
 #
 
 use Encode;
+use Text::CharWidth qw(mbswidth);
 
 use Irssi;
 use Irssi::UI;
@@ -66,7 +68,7 @@ sub topic {
 		}
 	}
 
-	unless ($topic) {
+	unless (defined $topic) {
 		$topic = 'Irssi v' . Irssi::parse_special('$J') . ' - http://www.irssi.org';
 	}
 
@@ -109,9 +111,9 @@ sub show {
 	my $topic = decode_utf8(topic());
 	my $width = $item->{size} - Irssi::format_get_length(Irssi::settings_get_str('topicche_format'));
 
-	if ($wait > 0 || length($topic) <= $width) {
+	if ($wait > 0 || mbswidth($topic) <= $width) {
 		if (Irssi::settings_get_bool('topicche_center')) {
-			$topic = ' ' x (($width / 2) - (length($topic) / 2)) . $topic;
+			$topic = ' ' x (($width / 2) - (mbswidth($topic) / 2)) . $topic;
 		}
 
 		$item->default_handler(0, Irssi::settings_get_str('topicche_format') . escape($topic), undef);
@@ -126,7 +128,7 @@ sub show {
 
 	my $text = substr $topic, $current;
 
-	if (length($text) == 0) {
+	if (mbswidth($text) == 0) {
 		$text .= ' ' x $spacing . $topic;
 		$spacing--;
 
@@ -134,8 +136,8 @@ sub show {
 			restart();
 		}
 	}
-	elsif (length($text) < $width / 2) {
-		$text .= ' ' x ($width / 2) . substr $topic, 0, $width - length($text);
+	elsif (mbswidth($text) < $width / 2) {
+		$text .= ' ' x ($width / 2) . substr $topic, 0, $width - mbswidth($text);
 		$current++;
 	}
 	else {
