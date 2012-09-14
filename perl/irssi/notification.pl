@@ -27,7 +27,7 @@ use vars qw($VERSION %IRSSI);
 $VERSION = '0.1';
 %IRSSI = (
 	author      => 'meh',
-	contact     => 'meh@paranoici.org',
+	contact     => 'meh@schizofreni.co',
 	name        => 'notification',
 	description => 'Persistent notification script.',
 	license     => 'AGPLv3',

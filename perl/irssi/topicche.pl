@@ -18,7 +18,7 @@ use vars qw($VERSION %IRSSI);
 $VERSION = '0.4';
 %IRSSI = (
 	author      => 'meh',
-	contact     => 'meh@paranoici.org',
+	contact     => 'meh@schizofreni.co',
 	name        => 'topicche',
 	description => 'Animated topic.',
 	license     => 'WTFPL',

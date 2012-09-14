@@ -14,7 +14,7 @@ use vars qw($VERSION %IRSSI);
 $VERSION = '0.1';
 %IRSSI = (
 	author      => 'meh',
-	contact     => 'meh@paranoici.org',
+	contact     => 'meh@schizofreni.co',
 	name        => 'bitlbee_typing',
 	description => 'BitlBee typing support.',
 	license     => 'WTFPL',

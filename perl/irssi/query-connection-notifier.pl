@@ -6,7 +6,7 @@ use vars qw($VERSION %IRSSI);
 $VERSION = '0.1';
 %IRSSI = (
 	author      => 'meh',
-	contact     => 'meh@paranoici.org',
+	contact     => 'meh@schizofreni.co',
 	name        => 'Query connection notification',
 	description => 'Notify in the query window when the nick connects',
 	license     => 'WTFPL',

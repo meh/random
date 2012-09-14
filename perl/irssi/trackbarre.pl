@@ -7,7 +7,7 @@ use vars qw($VERSION %IRSSI);
 $VERSION = '0.2';
 %IRSSI = (
 	author      => 'meh',
-	contact     => 'meh@paranoici.org',
+	contact     => 'meh@schizofreni.co',
 	name        => 'trackbarre',
 	description => 'Last read line thing.',
 	license     => 'WTFPL',

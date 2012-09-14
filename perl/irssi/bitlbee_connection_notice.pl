@@ -15,7 +15,7 @@ use vars qw($VERSION %IRSSI);
 $VERSION = '0.1';
 %IRSSI   = (
 	authors     => 'meh.',
-	contact     => 'meh@paranoici.org',
+	contact     => 'meh@schizofreni.co',
 	name        => 'BitlBee connection notice',
 	description => 'Adds an item to the status bar which shows when someone important connects.',
 	license     => 'GPLv3',
