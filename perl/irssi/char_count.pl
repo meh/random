@@ -20,11 +20,10 @@ $VERSION = '0.1';
 );
 
 sub char_count {
-	 my ($item, $get_size_only) = @_;
+	my ($item, $get_size_only) = @_;
+	my $length = length(decode_utf8(Irssi::parse_special('$L')));
 
-	 my $length = length(decode_utf8(Irssi::parse_special('$L')));
-
-	 $item->default_handler($get_size_only, "{sbr $length}", 0, $get_size_only);
+	return $item->default_handler($get_size_only, "{sbr $length}", 0, $get_size_only);
 }
 
 Irssi::signal_add_last 'gui key pressed' => sub {
