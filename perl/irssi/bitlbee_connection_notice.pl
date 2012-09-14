@@ -63,10 +63,10 @@ sub connection_notice {
 	my ($item, $get_size_only) = @_;
 
 	if ($notice ne "") {
-		$item->default_handler($get_size_only, "{sb Connected:$notice}", 0, 1);
+		return $item->default_handler($get_size_only, "{sb Connected:$notice}", 0, 1);
 	}
 	else {
-		$item->default_handler($get_size_only, "", 0, 1);
+		return $item->default_handler($get_size_only, "", 0, 1);
 	}
 }
 

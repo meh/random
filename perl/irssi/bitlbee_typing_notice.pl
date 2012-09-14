@@ -177,10 +177,10 @@ sub typing_notice {
 	if (exists $typing->{$channel}) {
 		my $mode = $typing->{$channel} == 2 ? 'thinking' : 'typing';
 
-		$item->default_handler($get_size_only, "{sb $mode}", 0, 1);
+		return $item->default_handler($get_size_only, "{sb $mode}", 0, 1);
 	}
 	else {
-		$item->default_handler($get_size_only, '', 0, 1);
+		return $item->default_handler($get_size_only, '', 0, 1);
 	}
 }
 
