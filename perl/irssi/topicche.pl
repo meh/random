@@ -8,7 +8,7 @@
 #
 
 use Encode;
-use Text::CharWidth qw(mbswidth);
+use Text::CharWidth qw(mbswidth mbwidth);
 
 use Irssi;
 use Irssi::UI;
@@ -86,11 +86,13 @@ sub topic {
 
 my $current;
 my $spacing,
+my $wide;
 my $wait;
 
 sub restart {
 	$current = 0;
 	$spacing = -1;
+	$wide    = 0;
 }
 
 sub restart_and_wait {
@@ -141,7 +143,18 @@ sub show {
 		$current++;
 	}
 	else {
-		$current++;
+		if ($wide) {
+			$wide = 0;
+			$current++;
+		}
+		else {
+			if (mbwidth($text) == 2) {
+				$wide = 1;
+			}
+			else {
+				$current++;
+			}
+		}
 	}
 
 	$item->default_handler(0, Irssi::settings_get_str('topicche_format') . escape($text), undef);
