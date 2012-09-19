@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        linkazza
-// @version     0.0.2
+// @version     0.0.3
 // @namespace   http://meh.schizofreni.co
 // @description Turn plain text URLs into links.
 // @updateURL   https://raw.github.com/meh/random/master/js/linkazza.user.js
