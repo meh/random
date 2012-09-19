@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        linkazza
 // @version     0.0.2
-// @namespace   http://meh.paranoid.pk
+// @namespace   http://meh.schizofreni.co
 // @description Turn plain text URLs into links.
 // @updateURL   https://raw.github.com/meh/random/master/js/linkazza.user.js
 // @include     *
@@ -15,9 +15,9 @@ var xpath =
 	'.//text()[not(ancestor::' + exclude.join(') and not(ancestor::') + ')]';
 
 var regexes = [
-	/\b([a-z][-a-z9-9+.]+:\/\/|www\.)[^\s'"<>()]+/gi,
-	/\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}\b/gi,
-]
+	/\b([a-z][\-a-z9-9+.]+:\/\/|www\.)[^\s'"<>()]+/gi,
+	/\b[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}\b/gi
+];
 
 var observer = new (this.MutationObserver || this.MozMutationObserver || this.WebKitMutationObserver)(function (mutations) {
 	mutations.forEach(function (mutation) {
@@ -36,7 +36,16 @@ observer.observe(document.body, { childList: true, characterData: true, subtree:
 defer(linkazza, document.body);
 
 function linkazza (node) {
+	// ugly hack, kill me now
+	if (node.you_are_the_demons) {
+		return;
+	}
+
 	if (node.nodeType == Node.ELEMENT_NODE) {
+		if (node.className == 'linkazza') {
+			return;
+		}
+
 		var i = 0;
 		var result = document.evaluate(xpath, node, null,
 			XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -61,16 +70,16 @@ function linkazza (node) {
 	var position = 0;
 
 	for (var i = 0, match; i < regexes.length; i++) {
-		while (match = regexes[i].exec(text)) {
+		while ((match = regexes[i].exec(text))) {
 			container = container || document.createElement('span');
 			container.appendChild(document.createTextNode(
-				text.substring(position, match.index)));
+				text.substring(position, match.index))).you_are_the_demons = true;
 
-			var link = match[0].replace(/\.*$/, '')
+			var link = match[0].replace(/\.*$/, '');
 			var a    = document.createElement('a');
 
 			a.className = 'linkazza';
-			a.appendChild(document.createTextNode(link));
+			a.appendChild(document.createTextNode(link)).you_are_the_demons = true;
 
 			if (link.indexOf(':/') < 0) {
 				if (link.indexOf('@') > 0) {
@@ -94,7 +103,7 @@ function linkazza (node) {
 		container.appendChild(document.createTextNode(text.substring(position, text.length)));
 
 		while (container.firstChild) {
-			node.parentNode.insertBefore(container.firstChild, node)
+			node.parentNode.insertBefore(container.firstChild, node);
 		}
 
 		node.parentNode.removeChild(node);
@@ -119,9 +128,9 @@ function defer (func) {
 
 		setTimeout(function () {
 			func.apply(null, rest);
-		}, 0);
+		}, 100);
 	}
 	else {
-		setTimeout(func, 0);
+		setTimeout(func, 100);
 	}
 }
